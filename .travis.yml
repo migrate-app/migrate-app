@@ -1,0 +1,23 @@
+language: java
+sudo: required
+branches:
+  except:
+  - /^v[0-9\.]+/
+before_script:
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+env:
+  matrix:
+  - CXX=g++-4.8
+  global:
+    secure: GEdNyKvV+cmFWlcdbf3arjxwPzxQAo1VoOvORmP7HaEazsea9Q9n1hkRfDHL5DfjLmOw+LeqjlBfAxEDqtxKwpzE4oIRNeYm/E5lYGOUeyw7olD1ATBMiPPK05taXpGAGv/LWPinvY373yDAubt/hDASg/ZbYWYTHBWyBESHFCxoQDyTinQ4gKRVyNAx5r3RdWhxj4y3ul70Pn7z40x7ORkW3dimo0IRAGSeoV4Ba+Ws9eFDxhnEGJfdS59/R9putGRLM78SZERzfnleL9C6thGDhFrguJzXx1j1zbpTNVH++N+ECU64SIx1iAEflaSLSKCy/MRAuEXOXIX13zlhBShteotP8sEEpiQ5c4C5dbnf1NreEB7nNUwmP808tPbjYqC2SF9xd12UrTz4yMKeqxUiYQycQdiKRCdcaS5jJnam+TBFoCJjRDUUbwh+TYLsYffuzbVjJRwCE7KIiz02VYvEjLmfhwi01nxsW2xEbpnO3O/o1DKIiY8diEFZP0kJ3my+N+kWf3Nc6Z29RT8P+G3ulrIt/QHXwP+vyZUS6+J0gudIY2RtZx9247+VFgu67mDeOTslkNjsQOmFnxmR3FvDni0DRdAIktxRHWU/8KNNVx1RVLAwfoqyAyDGBYVsEdw6K/+RSV1wnqo9SmRoeDE0cjwxLL6SghmIXae0tDk=
+notifications:
+  slack:
+    secure: vyREr+3QuRrPPiCsSHqdnU+rMwAiEoqQWXcriHGHsfUya4fO+kPZHgMqfa9DZrV2f7J9OjHwMddrNgr9QRzIvze3SzFhmWmhYH0a+CMAp1MZa8LEt933Fw3VX/8HiRmnB7EddaYB4PrdZeoqxAztEDyRpDAy6kniz4OCtkEUW9u19tv3fYxHgXHMOD6KFGUxjh2OTHLB7YjmItGAVqUR52V+nhFfgban+VA6qfrSJxakBopUbGgUhLb4PfnHug/AgLCDOZVbe4zE4LjEdfs/ZH6SsMBm2yyRU+HBRfVOxKaNBYlkrSg+kIpq7pBqvwYNsoSaFQWAoDsXmyRaNr3klN+t0jU9t1fmvZVlULiTEuAcFtt7kKH5y4W3BPh/g8XT9ziZaCXh0D0h+ywZO2HVz0fVcRw0JCCFUo/knRKmDwnUeM77owe891Ka80/B3oaawXrppuCXC3tyn/sudPAwL8AHglHdUh0d8vjwi+WMQP3r+KtWFyPvioXXTgVL9v/mIEWeyrgxiO63zf/I/Z0gaQV+njMUfnBPEpY5H2p+pwxWVkYNPICD3Wsxn6d4J/pTnNVuU7dHMPL88FSJtozFqQOTPJOukFxo5tRKryX4OYfTrqecF7/96xnNt9MqLSqCHlDRpHcIA9ZUy+NRl0EV4pDwlTmzL6oahvEfA+QkjWg=
