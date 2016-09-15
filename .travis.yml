@@ -1,28 +1,30 @@
 language: android
-
 sudo: false
-
 jdk: oraclejdk8
-
+branches:
+  except:
+  - /^v[0-9\.]+/
 env:
   global:
-    - GRADLE_OPTS="-Xmx4g"
-
+  - GRADLE_OPTS="-Xmx4g"
 android:
   components:
-    # Use the latest platform tools
-    - platform-tools
-    - tools
-
-    # Use the desired build tools
-    - build-tools-24.0.2
-
-    # Project target SDK
-    - android-24
-
-    # Project extra configuration
-    - extra-google-m2repository
-    - extra-android-m2repository
-
+  - platform-tools
+  - tools
+  - build-tools-24.0.2
+  - android-24
+  - extra-google-m2repository
+  - extra-android-m2repository
 script:
   - ./gradlew -s clean assemble
+  - ./gradlew build assembleRelease
+deploy:
+  provider: releases
+  user:
+    secure: pQOzjyfRi9KH2oNyV4ydkRY46BZzwqNNI7aLOouGSJYnhJoh8y0gMIdH3qun5+aTmyv7EVsXmAeXVqy7CEKjkduLEVcOKt8p9XbSPTNeJZO/kvK0AyRiN7apE7ptNFCqWaz7f/EnXrZPb5Na5MDyGGcR+dCb9GBYyetHTeTlVoCjor8vdOCMky/SUHFkYPG1P5Sb+sQOKeRHcEyBFlM2MiUc3LYENQ3fdpktjvdehgeuHctJnrIpIpR5stkEe6xG9fXyvTL6y/D8PLqCcKF/rqPtdalQP8svtewiMJOjoSAsBpV9Osvm6G1RTIEcCYR0VG/ED4yyiE1PmIsNVXR/6HXZL1quu6mp16oYJGnPQ3UkM/xoHefrAbaac2iWCuB908fVennN3/ygQQ33PLPmlZQYpU5wNWEmmTfqWDhMejUDzWhSopRmVuXQA+kOIWsHtt44QmobfOFGm0exY0x9efTX9ry/AqA5gtAMu9NcBBrJSVocXGDHlbo/rGQ9e2faIgxQV1FQOWWjnTxne28PIvzDZtWen9KbVKyMmtthjy3tUA1OAJZU9wJvQ3T98Ta2p+Qi2hzSybthOOK/BxRKQloeWHEdT+Xw0Oq1s8Ase/coZQ0mo1oIV9oHkuAha7HQfNBsT++6+AcyhJ+/yaQRqLGRm0CstXJySt5drt3kQZw=
+  password:
+    secure: m/wD6qhB8jFvp67jM+3KXjuAh1Jrt0nFdTgPAhsi2EL1JJKS3ebQCmJrs56qmTveVSrD9XE60JW52uoANn3+n5fxX43d+gO5Juhc6UOBOF35YUscqoUgUEkoy1yys713dl/jgNgJupfH49kb7tzr/xuVP2J9ynzefbLAGrKC2fzxJAxCT2O+yTo+SsfrWe/JlZ3ceu/LMf1ielL6pUsG0SVAiV4ZnMmfzXFMZ93bxLr3p3qA0zgr0fe14Sm5M6T3QM4Kx3Sk46lWl6SuT6rVy04gbyEHs70UCNn1llNjmnZ4+WgpvQP0v/DHSREQHiDeFdKyCZgk0CeF51p/sh0x9+lerGT+d4K1amMbHfcUHiROlp3zj7HcpuJI/XjNZlBgpgwFdE/xRBO7Nqcoyz2wQ5PlP854b+nVamlDUl01hpDvwq5fQqCtnSlT6nyQUIHA/nngaGK/FbvQrLOHB5acdMreLBIVG4tsLgReJk3up/cJ8FnIzCCBLdMWmDgThnypOk5j8ktVuhN9hnW6MmRifYekGsl6y+lwcFjZXNnOk2ITVSsMfZ/d6RgeN90+hGr4Yoh07sQpn8Z21/FaEf50Bpi5GG10YmZ/4jA9dVrT+g7Zzmn2UuPidHFTP64J5V5g6A9aYAo+UYHjcN+M2SXo5LH1hHMwwCXkL8HO3ZfPU/Y=
+  file: app/build/outputs/apk/app-release-unsigned.apk
+  skip_cleanup: true
+  on:
+    tags: true
