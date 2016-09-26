@@ -20,8 +20,8 @@ before_install:
   - export PATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace/bin:$PATH"
   - go get github.com/aktau/github-release
 after_success:
-  - github-release release --user dankideacentral --repo nightjar-app --tag v$(cat .version) --name $(cat .version) --description "Built by Travis CI" --pre-release
-  - github-release upload  --user dankideacentral --repo nightjar-app  --tag v$(cat .version) --name "release.apk" --file "app/build/outputs/apk/app-release-unsigned.apk"
+  - github-release release --user dankideacentral --repo migrate-app --tag v$(cat .version) --name $(cat .version) --description "Built by Travis CI" --pre-release
+  - github-release upload  --user dankideacentral --repo migrate-app  --tag v$(cat .version) --name "release.apk" --file "app/build/outputs/apk/app-release-unsigned.apk"
 script:
   - ./gradlew -s clean assemble
   - ./gradlew build assembleRelease
