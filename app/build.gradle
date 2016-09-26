@@ -19,10 +19,12 @@ android {
     }
     defaultConfig {
         applicationId "com.dankideacentral.dic"
+        multiDexEnabled true
         minSdkVersion 21
         targetSdkVersion 24
         versionCode 21
         versionName "1.0"
+
     }
     buildTypes {
         debug {
