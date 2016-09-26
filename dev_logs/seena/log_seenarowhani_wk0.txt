@@ -1,0 +1,10 @@
+Weekly Duties (Hours spent are in brackets)
+Seena Rowhani - 100945353
+--------------------------------------------
+- Meet with team to brainstorm project ideas (2h)
+- Work with team on completion of D1 PDF file (2.5h)
+
+Sunday Sept 25th
+- Repository initialization
+- Travis ci integrated release build set up
+- Contribution towards low fidelity mockups using balsamiq
