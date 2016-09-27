@@ -9,6 +9,8 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
 
     <application
         android:allowBackup="true"
@@ -31,10 +33,6 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="bb159ef850c165e32df73a4534933fd777171a20" />
-
-        <service
-            android:name=".TwitterService"
-            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
