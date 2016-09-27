@@ -19,7 +19,7 @@ before_install:
   - export GOPATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace:$GOPATH"
   - export PATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace/bin:$PATH"
   - go get github.com/aktau/github-release
-after_success:
+after_script:
   - github-release release --user dankideacentral --repo migrate-app --tag v$(cat .version) --name $(cat .version) --description "Built by Travis CI" --pre-release
   - github-release upload  --user dankideacentral --repo migrate-app  --tag v$(cat .version) --name "release.apk" --file "app/build/outputs/apk/app-release-unsigned.apk"
 script:
