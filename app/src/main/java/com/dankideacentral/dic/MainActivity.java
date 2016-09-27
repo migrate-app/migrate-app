@@ -1,15 +1,26 @@
 package com.dankideacentral.dic;
 
+import android.*;
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
+
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.twitter.sdk.android.Twitter;
@@ -20,14 +31,17 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
+import java.lang.reflect.Array;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 0;
+    // TODO: Fix problem reading the .properties file
+    private String CONSUMER_KEY = "vLENiRXCWbppil87JS3mJPnt9";
+    private String CONSUMER_SECRET = "oUq42taMrOjoScNSLPZYiFdMxw4VtZYXgejXwDX4aHwAGroObn";
 
     // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
-    private static final String TWITTER_KEY = "vLENiRXCWbppil87JS3mJPnt9";
-    private static final String TWITTER_SECRET = "oUq42taMrOjoScNSLPZYiFdMxw4VtZYXgejXwDX4aHwAGroObn";
-
     private TwitterLoginButton loginButton;
 
     private GoogleMap mMap;
@@ -35,7 +49,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
+
+        TwitterAuthConfig authConfig =
+                new TwitterAuthConfig(CONSUMER_KEY, CONSUMER_SECRET);
         Fabric.with(this, new Twitter(authConfig));
         setContentView(R.layout.main_activity);
 
@@ -56,12 +72,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("TwitterKit", "Login with Twitter failure", exception);
             }
         });
-
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_LOCATION);
+        }
+
     }
 
     @Override
@@ -70,6 +92,29 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // Make sure that the loginButton hears the result from any
         // Activity that it triggered.
         loginButton.onActivityResult(requestCode, resultCode, data);
+    }
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
     /**
@@ -85,9 +130,43 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LocationManager locationManager = (LocationManager)
+                getSystemService(Context.LOCATION_SERVICE);
+        Location loc = null;
+        try {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location loc) {
+                    LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+
+                    mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+            });
+            loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (loc != null) {
+                LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+
+                mMap.addMarker(new MarkerOptions().position(currentLocation).title("Current Location"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+            }
+        } catch (SecurityException e) {
+            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
+        }
     }
 }
