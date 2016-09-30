@@ -8,14 +8,20 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 
+import com.dankideacentral.dic.ItemFragment.OnListFragmentInteractionListener;
+import com.dankideacentral.dic.dummy.DummyContent;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,7 +41,7 @@ import java.lang.reflect.Array;
 
 import io.fabric.sdk.android.Fabric;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback, OnListFragmentInteractionListener {
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 0;
     // TODO: Fix problem reading the .properties file
     private String CONSUMER_KEY = "vLENiRXCWbppil87JS3mJPnt9";
@@ -43,18 +49,20 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
     private TwitterLoginButton loginButton;
-
+    private Button toggleButton;
     private GoogleMap mMap;
-
+    private Fragment currentFragment;
+    private SupportMapFragment mapFragment;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         TwitterAuthConfig authConfig =
                 new TwitterAuthConfig(CONSUMER_KEY, CONSUMER_SECRET);
         Fabric.with(this, new Twitter(authConfig));
         setContentView(R.layout.main_activity);
-
+        mapFragment = new SupportMapFragment();
+        mapFragment.getMapAsync(this);
         loginButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
         loginButton.setCallback(new Callback<TwitterSession>() {
             @Override
@@ -72,9 +80,20 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("TwitterKit", "Login with Twitter failure", exception);
             }
         });
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        toggleButton = (Button) findViewById(R.id.toggle);
+        toggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentFragment = currentFragment instanceof ItemFragment ?
+                        mapFragment :
+                        new ItemFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.frame_container, currentFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -168,5 +187,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (SecurityException e) {
             Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+
     }
 }
