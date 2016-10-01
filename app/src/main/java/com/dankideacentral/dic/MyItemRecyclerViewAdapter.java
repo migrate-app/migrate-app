@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.dankideacentral.dic.ItemFragment.OnListFragmentInteractionListener;
+import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.dummy.DummyContent.DummyItem;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_item, parent, false);
+                .inflate(R.layout.tweet_list, parent, false);
         return new ViewHolder(view);
     }
 

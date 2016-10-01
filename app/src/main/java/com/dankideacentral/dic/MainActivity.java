@@ -1,6 +1,5 @@
 package com.dankideacentral.dic;
 
-import android.*;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -11,16 +10,17 @@ import android.location.LocationManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 
-import com.dankideacentral.dic.ItemFragment.OnListFragmentInteractionListener;
+import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.dummy.DummyContent;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,8 +37,6 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
-import java.lang.reflect.Array;
-
 import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, OnListFragmentInteractionListener {
@@ -51,58 +49,58 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private TwitterLoginButton loginButton;
     private Button toggleButton;
     private GoogleMap mMap;
-    private Fragment currentFragment;
     private SupportMapFragment mapFragment;
+    private Fragment listFragment;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TwitterAuthConfig authConfig =
-                new TwitterAuthConfig(CONSUMER_KEY, CONSUMER_SECRET);
-        Fabric.with(this, new Twitter(authConfig));
         setContentView(R.layout.main_activity);
-        mapFragment = new SupportMapFragment();
-        mapFragment.getMapAsync(this);
-        loginButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
-        loginButton.setCallback(new Callback<TwitterSession>() {
-            @Override
-            public void success(Result<TwitterSession> result) {
-                // The TwitterSession is also available through:
-                // Twitter.getInstance().core.getSessionManager().getActiveSession()
-                TwitterSession session = result.data;
-                // TODO: Remove toast and use the TwitterSession's userID
-                // with your app's user model
-                String msg = "@" + session.getUserName() + " logged in! (#" + session.getUserId() + ")";
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
-            }
-            @Override
-            public void failure(TwitterException exception) {
-                Log.d("TwitterKit", "Login with Twitter failure", exception);
-            }
-        });
+
+        initFragments();
+
         toggleButton = (Button) findViewById(R.id.toggle);
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentFragment = currentFragment instanceof ItemFragment ?
-                        mapFragment :
-                        new ItemFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.frame_container, currentFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                FragmentManager fm = getSupportFragmentManager();
+                Fragment current = fm.findFragmentByTag("CURRENT_FRAGMENT")
+                        instanceof TweetListFragment
+                            ? mapFragment
+                            : listFragment;
+                createTransaction(current, "CURRENT_FRAGMENT");
             }
         });
+        requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, MY_PERMISSIONS_REQUEST_LOCATION);
 
+    }
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+    private void requestPermission(String requested, int granted) {
+        if (ContextCompat.checkSelfPermission(this, requested) != 0) {
             requestPermissions(
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_LOCATION);
+                new String[]{requested},
+                granted
+            );
         }
+    }
 
+    private void createTransaction(Fragment currentFragment) {
+        createTransaction(currentFragment, null);
+    }
+
+    private void createTransaction(Fragment currentFragment, String tag) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_container, currentFragment, tag);
+        transaction.addToBackStack(tag);
+        transaction.commit();
+    }
+
+    private void initFragments() {
+        mapFragment = new SupportMapFragment();
+        mapFragment.getMapAsync(this);
+        createTransaction(mapFragment);
+
+        listFragment = new TweetListFragment();
     }
 
     @Override
