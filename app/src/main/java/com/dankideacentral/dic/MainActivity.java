@@ -2,7 +2,6 @@ package com.dankideacentral.dic;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -34,12 +33,13 @@ import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
-import twitter4j.Twitter;
-import twitter4j.TwitterFactory;
+
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, OnListFragmentInteractionListener {
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 0;
@@ -82,12 +82,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void initTweetListener() {
         ConfigurationBuilder cb = new ConfigurationBuilder();
-
-        cb.setDebugEnabled(true)
-                .setOAuthConsumerKey("SArN2YtMrnaCgenNghXb0NKRC")
-                .setOAuthConsumerSecret("S45LXQjBFbzb7PFC1UOvmeUs4WTzMjOpjnsMyIb3FG13oGqXO0")
-                .setOAuthAccessToken("2285023139-3YQSkxwpTEqJFrn8OfKVQnhfjY8N9mUiSNL4X1l")
-                .setOAuthAccessTokenSecret("FlOBRaXAyS8GkEI5cU0NOp4x6ejFezrif5aCZxgHXmaLs");
+        Context ctx = this;
+        PropertiesReader pr = new PropertiesReader("app.properties", getAssets());
+        cb
+                .setOAuthConsumerKey(PropertiesReader.getProperty("TWITTER_CONSUMER_KEY"))
+                .setOAuthConsumerSecret(PropertiesReader.getProperty("TWITTER_CONSUMER_SECRET"))
+                .setOAuthAccessToken(PropertiesReader.getProperty("TWITTER_ACCESS_KEY"))
+                .setOAuthAccessTokenSecret(PropertiesReader.getProperty("TWITTER_ACCESS_SECRET"));
         TwitterStream stream = new TwitterStreamFactory(cb.build()).getInstance();
         stream.addListener(new StatusListener() {
             @Override
