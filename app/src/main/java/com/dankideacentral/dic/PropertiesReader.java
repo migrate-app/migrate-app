@@ -1,7 +1,7 @@
 package com.dankideacentral.dic;
 
-import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,9 @@ public class PropertiesReader {
         try {
             InputStream inputStream = am.open(fileName);
             props.load(inputStream);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+            Log.e(this.getClass().getName(), e.toString());
+        }
     }
     public static String getProperty (String key) {
         return props.getProperty(key);
