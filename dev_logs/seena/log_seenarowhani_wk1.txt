@@ -1,0 +1,11 @@
+Weekly Duties (Hours spent are in brackets)
+Seena Rowhani - 100945353
+--------------------------------------------
+- Meet with team to brainstorm project ideas (2h)
+- Work with team on completion of D1 PDF file (2.5h)
+
+10/2/2016
+- Moved oauth of deployments to user `travis-ci-migrate`
+- Shell of main activity fragments, and switching using frag manager
+- Shell of streaming tweets, i.e pulling in twitter4j
+    - opening tweet stream / logging / creating markers for tweets
