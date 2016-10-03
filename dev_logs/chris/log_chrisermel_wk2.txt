@@ -1,1 +1,6 @@
-
+Weekly Duties (Hours spent are in brackets)
+Christopher Ermel - 100934583
+--------------------------------------------
+- Meet with team to plan tasks and divide work (1.5h)
+- Work with team on completion of D1 pitch (2h)
+- Setup development environment and complete task for creating initial SearchActivity (30m)
