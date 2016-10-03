@@ -16,5 +16,7 @@
         completions."
     </string>
     <string name="toggle_view">Toggle View</string>
+    <string name="enter_a_location">Enter a location...</string>
+    <string name="search">Search</string>
 
 </resources>
