@@ -41,9 +41,9 @@ android {
 }
 
 try {
-    props.load(file('fabric.properties').newDataInputStream())
-} catch (Exception ex) {
-    throw new GradleException("Missing fabric.properties file in app");
+    props.load(file("fabric.properties").newDataInputStream())
+} catch (Exception e) {
+    throw new GradleException("Missing fabric.properties file");
 }
 
 repositories {
