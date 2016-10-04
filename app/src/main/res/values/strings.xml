@@ -1,8 +1,7 @@
 <resources>
     <string name="app_name">Migrate</string>
     <string name="title_activity_main">Migrate</string>
-    <string name="title_activity_login">Sign in</string>
-
+    <string name="sign_in">Sign in</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
@@ -15,6 +14,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="twitter_auth_preference" translatable="false">twitter_auth</string>
     <string name="toggle_view">Toggle View</string>
     <string name="enter_a_location">Enter a location...</string>
     <string name="search">Search</string>
