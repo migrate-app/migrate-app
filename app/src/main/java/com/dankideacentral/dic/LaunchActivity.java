@@ -10,6 +10,8 @@ import android.util.Log;
 
 public class LaunchActivity extends AppCompatActivity {
 
+    private static final String EMPTY_STRING = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +23,7 @@ public class LaunchActivity extends AppCompatActivity {
                 fineLocationPermission,
                 this.getPackageName());
         // auth tokens don't expire. Just check if it exists
-        if ("".equals(twitterAuth)) {
+        if (EMPTY_STRING.equals(twitterAuth)) {
             Intent loginIntent = new Intent(this, LoginActivity.class);
             startActivity(loginIntent);
         } else {
