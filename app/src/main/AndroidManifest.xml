@@ -5,7 +5,7 @@
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality. 
+         location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -24,7 +24,7 @@
              Note that the API key is linked to the encryption key used to sign the APK.
              You need a different API key for each encryption key, including the release key that is used to
              sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -37,18 +37,33 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
                 <meta-data
                     android:name="io.fabric.ApiKey"
                     android:value="bb159ef850c165e32df73a4534933fd777171a20" />
 
                 <uses-permission android:name="android.permission.INTERNET" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".SearchActivity" />
 
+        <!--
+         This Activity has no UI. Its the first activity to launch and routes to the correct
+        activity, then is cleared from the task stack
+        -->
+
+        <activity
+            android:name=".LaunchActivity"
+            android:noHistory="true"
+          >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SearchActivity"></activity>
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>
