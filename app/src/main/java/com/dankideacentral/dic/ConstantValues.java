@@ -2,6 +2,9 @@ package com.dankideacentral.dic;
 
 /**
  * Created by basim on 10/6/16.
+ * This file was part of the tutorial I was using. 
+ *
+ * TODO: Use SharedPreferences instead of this shitty file.
  */
 
 public class ConstantValues {
