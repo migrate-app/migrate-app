@@ -29,21 +29,14 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="bb159ef850c165e32df73a4534933fd777171a20" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".TweetFeedActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
 
-                <meta-data
-                    android:name="io.fabric.ApiKey"
-                    android:value="bb159ef850c165e32df73a4534933fd777171a20" />
-
-                <uses-permission android:name="android.permission.INTERNET" />
             </intent-filter>
         </activity>
         <activity android:name=".SearchActivity" />
@@ -57,11 +50,6 @@
             android:name=".LaunchActivity"
             android:noHistory="true"
           >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".LoginActivity"></activity>
     </application>

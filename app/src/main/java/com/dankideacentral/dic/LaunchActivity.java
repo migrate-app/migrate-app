@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 
 public class LaunchActivity extends AppCompatActivity {
 
@@ -28,7 +27,7 @@ public class LaunchActivity extends AppCompatActivity {
             startActivity(loginIntent);
         } else {
             if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
-                Intent mapIntent = new Intent(this, MainActivity.class);
+                Intent mapIntent = new Intent(this, TweetFeedActivity.class);
                 startActivity(mapIntent);
             } else {
                 Intent searchIntent = new Intent(this, SearchActivity.class);
