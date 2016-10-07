@@ -82,13 +82,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void initTweetListener() {
         ConfigurationBuilder cb = new ConfigurationBuilder();
-        Context ctx = this;
-        PropertiesReader pr = new PropertiesReader("app.properties", getAssets());
+
+        // TODO: Delete this object because app.properties is not being used any more.
+        // PropertiesReader pr = new PropertiesReader("app.properties", getAssets());
         cb
-                .setOAuthConsumerKey(PropertiesReader.getProperty("TWITTER_CONSUMER_KEY"))
-                .setOAuthConsumerSecret(PropertiesReader.getProperty("TWITTER_CONSUMER_SECRET"))
-                .setOAuthAccessToken(PropertiesReader.getProperty("TWITTER_ACCESS_KEY"))
-                .setOAuthAccessTokenSecret(PropertiesReader.getProperty("TWITTER_ACCESS_SECRET"));
+                .setOAuthConsumerKey(getString(R.string.twitter_consumer_key))
+                .setOAuthConsumerSecret(getString(R.string.twitter_consumer_secret))
+                .setOAuthAccessToken(getString(R.string.twitter_access_key))
+                .setOAuthAccessTokenSecret(getString(R.string.twitter_access_secret));
         TwitterStream stream = new TwitterStreamFactory(cb.build()).getInstance();
         stream.addListener(new StatusListener() {
             @Override

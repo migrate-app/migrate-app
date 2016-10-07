@@ -1,5 +1,6 @@
 package com.dankideacentral.dic;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -17,19 +18,19 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        boolean useStoredTokenKey = true;
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         initializeLoginButton();
 
-        /* If the user is already authenticated, log the user in */
-        if (useStoredTokenKey) {
-            logIn();
-        }
+        System.out.println(this.getString(R.string.twitter_consumer_key));
+        System.out.println(this.getString(R.string.twitter_consumer_secret));
+
+        // Start the login process automatically
+        // TODO: Add an if-condition that only logs the user if they're already authenticated.
+        logIn();
     }
 
-    /* Attach click listener to the login button */
+    /* Attach a click listener to the login button which starts the authentication process */
     private void initializeLoginButton() {
         View.OnClickListener buttonLoginOnClickListener = new View.OnClickListener() {
             @Override
@@ -45,7 +46,8 @@ public class LoginActivity extends AppCompatActivity {
     private void logIn() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        if (sharedPreferences.getBoolean(ConstantValues.PREFERENCE_TWITTER_IS_LOGGED_IN, false)) {
+        // Start MainActivity if user already logged in, otherwise start the authentication
+        if (sharedPreferences.getBoolean(getString(R.string.preference_twitter_logged_in), false)) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
         } else {
@@ -53,27 +55,26 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /* This task creates a RequestToken using the consumer key and consumer secret for our team
+     * Twitter account, then opens a WebView that allows the user to enter their username and
+     * password directly to Twitter. This task will run in a new thread.
+     */
     private class TwitterAuthenticateTask extends AsyncTask<String, String, RequestToken> {
         @Override
         protected RequestToken doInBackground(String... params) {
-            return TwitterUtil.getInstance().getRequestToken();
+            return TwitterUtil.getInstance().getRequestToken(getString(R.string.twitter_callback_url));
         }
 
         @Override
         protected void onPostExecute(RequestToken requestToken) {
-            boolean useWebViewForAuthentication = true;
-
-            if (requestToken != null)
-            {
-                if (useWebViewForAuthentication) {
-                    Intent intent = new Intent(getApplicationContext(), OAuthActivity.class);
-                    intent.putExtra(ConstantValues.STRING_EXTRA_AUTHENTICATION_URL, requestToken.getAuthenticationURL());
-                    startActivity(intent);
-                } else {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(requestToken.getAuthenticationURL()));
-                    startActivity(intent);
-                }
+            if (requestToken == null) {
+                return; // TODO: Improve error handling when no request token is received.
             }
+
+            // Use a WebView to provide an authentication interface to the user
+            Intent intent = new Intent(getApplicationContext(), OAuthActivity.class);
+            intent.putExtra(getString(R.string.string_extra_authentication_url), requestToken.getAuthenticationURL());
+            startActivity(intent);
         }
     }
 }

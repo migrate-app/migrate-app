@@ -16,6 +16,7 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        TwitterUtil.init(getApplicationContext()); // initialize the Twitter Singleton
         String twitterAuth = preferences.getString(getString(R.string.twitter_auth_preference), "");
         String fineLocationPermission = "android.permission.ACCESS_FINE_LOCATION";
         PackageManager pm = this.getPackageManager();
@@ -36,6 +37,4 @@ public class LaunchActivity extends AppCompatActivity {
             }
         }
     }
-
-
-    }
+}

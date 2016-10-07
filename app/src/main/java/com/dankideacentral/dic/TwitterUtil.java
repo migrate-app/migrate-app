@@ -1,5 +1,7 @@
 package com.dankideacentral.dic;
 
+import android.content.Context;
+
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -10,18 +12,43 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public final class TwitterUtil {
 
-    private RequestToken requestToken = null;
-    private TwitterFactory twitterFactory = null;
-    private Twitter twitter;
+    private static RequestToken requestToken = null;
+    private static TwitterFactory twitterFactory = null;
+    private static Twitter twitter = null;
 
-    private TwitterUtil() {
+    private static TwitterUtil instance = new TwitterUtil();
+
+    public static void init(Context applicationContext) {
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.setOAuthConsumerKey(ConstantValues.TWITTER_CONSUMER_KEY);
-        configurationBuilder.setOAuthConsumerSecret(ConstantValues.TWITTER_CONSUMER_SECRET);
+        configurationBuilder.setOAuthConsumerKey(applicationContext.getString(R.string.twitter_consumer_key));
+        configurationBuilder.setOAuthConsumerSecret(applicationContext.getString(R.string.twitter_consumer_secret));
         Configuration configuration = configurationBuilder.build();
         twitterFactory = new TwitterFactory(configuration);
         twitter = twitterFactory.getInstance();
     }
+
+    /* Making the constructor private disallows the creation of TwitterUtil objects,
+     * which is required to stay in line with the Singleton design pattern (???) */
+    private TwitterUtil() {}
+
+    public RequestToken getRequestToken(String twitterCallbackURL) {
+        if (requestToken == null) {
+            try {
+                requestToken = twitterFactory.getInstance().getOAuthRequestToken(twitterCallbackURL);
+            } catch (TwitterException e) {
+                e.printStackTrace();
+            }
+        }
+        return requestToken;
+    }
+
+    public void reset() {
+        instance = new TwitterUtil();
+    }
+
+    /***********************
+     * Getters and setters *
+     ***********************/
 
     public TwitterFactory getTwitterFactory() {
         return twitterFactory;
@@ -35,24 +62,7 @@ public final class TwitterUtil {
         return twitter;
     }
 
-    public RequestToken getRequestToken() {
-        if (requestToken == null) {
-            try {
-                requestToken = twitterFactory.getInstance().getOAuthRequestToken(ConstantValues.TWITTER_CALLBACK_URL);
-            } catch (TwitterException e) {
-                e.printStackTrace();  // To change body of catch statement use File | Settings | File Templates.
-            }
-        }
-        return requestToken;
-    }
-
-    static TwitterUtil instance = new TwitterUtil();
-
     public static TwitterUtil getInstance() {
         return instance;
-    }
-
-    public void reset() {
-        instance = new TwitterUtil();
     }
 }
