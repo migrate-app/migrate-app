@@ -6,7 +6,8 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+
+import com.dankideacentral.dic.authentication.LoginActivity;
 
 public class LaunchActivity extends AppCompatActivity {
 

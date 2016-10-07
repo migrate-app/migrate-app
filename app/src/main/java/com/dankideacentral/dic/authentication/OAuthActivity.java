@@ -1,8 +1,10 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.authentication;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+
+import com.dankideacentral.dic.R;
 
 public class OAuthActivity extends FragmentActivity {
     @Override
