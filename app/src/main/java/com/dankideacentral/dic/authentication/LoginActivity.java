@@ -9,7 +9,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 
-import com.dankideacentral.dic.MainActivity;
+import com.dankideacentral.dic.TweetFeedActivity;
 import com.dankideacentral.dic.R;
 import com.dankideacentral.dic.TwitterUtil;
 
@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     /* Start MainActivity for users already authenticated, otherwise open the authentication UI */
     private void logIn() {
         if (sharedPreferences.getBoolean(getString(R.string.preference_twitter_logged_in), false)) {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(LoginActivity.this, TweetFeedActivity.class);
             startActivity(intent);
         } else {
             new TwitterAuthenticateTask().execute();

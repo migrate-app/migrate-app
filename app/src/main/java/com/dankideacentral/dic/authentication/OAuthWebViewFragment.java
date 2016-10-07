@@ -11,7 +11,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.dankideacentral.dic.MainActivity;
+import com.dankideacentral.dic.TweetFeedActivity;
 import com.dankideacentral.dic.R;
 
 public class OAuthWebViewFragment extends Fragment {
@@ -39,7 +39,7 @@ public class OAuthWebViewFragment extends Fragment {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("oauth_verifier=")) {
-                    Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
+                    Intent intent = new Intent(getActivity().getApplicationContext(), TweetFeedActivity.class);
                     intent.setData(Uri.parse(url));
                     startActivity(intent);
                 }

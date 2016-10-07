@@ -30,22 +30,10 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="bb159ef850c165e32df73a4534933fd777171a20" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".TweetFeedActivity"
             android:label="@string/title_activity_main">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <meta-data
-                    android:name="io.fabric.ApiKey"
-                    android:value="bb159ef850c165e32df73a4534933fd777171a20" />
-
-                <uses-permission android:name="android.permission.INTERNET" />
-            </intent-filter>
         </activity>
         <activity android:name=".SearchActivity" />
 
@@ -53,7 +41,6 @@
          This Activity has no UI. Its the first activity to launch and routes to the correct
         activity, then is cleared from the task stack
         -->
-
         <activity
             android:name=".LaunchActivity"
             android:noHistory="true">
