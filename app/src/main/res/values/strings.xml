@@ -14,9 +14,26 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="twitter_auth_preference" translatable="false">twitter_auth</string>
+
     <string name="toggle_view">Toggle View</string>
     <string name="enter_a_location">Enter a location...</string>
     <string name="search">Search</string>
+
+    <!-- Twitter API Access -->
+    <string name="twitter_consumer_key">bWvl3mtpgvc2wq6srRhilXcbk</string>
+    <string name="twitter_consumer_secret">jfHMQd7n5qmShHT4uvEUjmGfdrh6Kgjnb612rPkIgv5AbyxCk6</string>
+    <string name="twitter_access_key">784006822092877824-zeqUzbGAI6xGGaJDCS8qhIOSt7KjTT8</string>
+    <string name="twitter_access_secret">iDa65wU5OyXOYucADNcCAKNKIVRrMkXeA86ODlp652HYK</string>
+
+    <!-- Twitter OAuth -->
+    <string name="twitter_callback_url">http://www.example.com/</string>
+    <string name="twitter_auth_preference" translatable="false">twitter_auth</string>
+    <string name="url_parameter_twitter_oauth_verifier">oauth_verifier</string>
+    <string name="string_extra_authentication_url">AuthenticationUrl</string>
+
+    <!-- Twitter Shared Preference Names -->
+    <string name="preference_twitter_oauth_token">TWITTER_OAUTH_TOKEN</string>
+    <string name="preference_twitter_oauth_token_secret">TWITTER_OAUTH_TOKEN_SECRET</string>
+    <string name="preference_twitter_logged_in">TWITTER_LOGGED_IN</string>
 
 </resources>

@@ -6,7 +6,8 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+
+import com.dankideacentral.dic.authentication.LoginActivity;
 
 public class LaunchActivity extends AppCompatActivity {
 
@@ -16,6 +17,7 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        TwitterUtil.init(getApplicationContext()); // initialize the Twitter Singleton
         String twitterAuth = preferences.getString(getString(R.string.twitter_auth_preference), "");
         String fineLocationPermission = "android.permission.ACCESS_FINE_LOCATION";
         PackageManager pm = this.getPackageManager();
@@ -36,6 +38,4 @@ public class LaunchActivity extends AppCompatActivity {
             }
         }
     }
-
-
-    }
+}
