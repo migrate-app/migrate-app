@@ -26,7 +26,7 @@
     <string name="twitter_access_secret">iDa65wU5OyXOYucADNcCAKNKIVRrMkXeA86ODlp652HYK</string>
 
     <!-- Twitter OAuth -->
-    <string name="twitter_callback_url">http://www.basim.ca/</string>
+    <string name="twitter_callback_url">http://www.example.com/</string>
     <string name="twitter_auth_preference" translatable="false">twitter_auth</string>
     <string name="url_parameter_twitter_oauth_verifier">oauth_verifier</string>
     <string name="string_extra_authentication_url">AuthenticationUrl</string>

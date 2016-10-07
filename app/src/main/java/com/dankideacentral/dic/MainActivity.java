@@ -84,7 +84,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         ConfigurationBuilder cb = new ConfigurationBuilder();
 
         // TODO: Delete this object because app.properties is not being used any more.
-        // PropertiesReader pr = new PropertiesReader("app.properties", getAssets());
+        PropertiesReader pr = new PropertiesReader("app.properties", getAssets());
         cb
                 .setOAuthConsumerKey(getString(R.string.twitter_consumer_key))
                 .setOAuthConsumerSecret(getString(R.string.twitter_consumer_secret))

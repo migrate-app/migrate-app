@@ -14,7 +14,7 @@ public class OAuthActivity extends FragmentActivity {
         String authenticationUrl = getIntent().getStringExtra(getString(R.string.string_extra_authentication_url));
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         OAuthWebViewFragment oAuthWebViewFragment = new OAuthWebViewFragment(authenticationUrl);
-        fragmentTransaction.add(android.R.id.content,oAuthWebViewFragment);
+        fragmentTransaction.add(android.R.id.content, oAuthWebViewFragment);
         fragmentTransaction.commit();
     }
 }

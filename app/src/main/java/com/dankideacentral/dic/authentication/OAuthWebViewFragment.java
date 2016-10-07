@@ -18,10 +18,8 @@ public class OAuthWebViewFragment extends Fragment {
     private WebView webView;
     private String authenticationUrl;
 
-    /* Stuck this in to stop Android Studio from complaining */
-    public OAuthWebViewFragment() {
-        return;
-    }
+    // FIXME: I added this default constructor to stop Android Studio from complaining
+    public OAuthWebViewFragment() {}
 
     public OAuthWebViewFragment(String authenticationUrl) {
         this.authenticationUrl = authenticationUrl;
@@ -40,17 +38,16 @@ public class OAuthWebViewFragment extends Fragment {
         {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.contains("oauth_verifier="))
-                {
+                if (url.contains("oauth_verifier=")) {
                     Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
-                    intent.setData( Uri.parse(url));
+                    intent.setData(Uri.parse(url));
                     startActivity(intent);
                 }
                 view.loadUrl(url);
                 return true;
             }
         });
-        WebSettings webSettings= webView.getSettings();
+        WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
     }
 
