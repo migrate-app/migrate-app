@@ -6,23 +6,24 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import com.dankideacentral.dic.authentication.LoginActivity;
 
 public class LaunchActivity extends AppCompatActivity {
 
-    private static final String EMPTY_STRING = "";
+    private static final String FINE_LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String twitterAuth = preferences.getString(getString(R.string.twitter_auth_preference), "");
-        String fineLocationPermission = "android.permission.ACCESS_FINE_LOCATION";
+        TwitterUtil.init(getApplicationContext()); // initialize the Twitter Singleton
+        String twitterAuth = preferences.getString(getString(R.string.twitter_auth_preference), null);
         PackageManager pm = this.getPackageManager();
         int hasFineLocationPermission = pm.checkPermission(
-                fineLocationPermission,
+                FINE_LOCATION_PERMISSION,
                 this.getPackageName());
         // auth tokens don't expire. Just check if it exists
-        if (EMPTY_STRING.equals(twitterAuth)) {
+        if (twitterAuth == null) {
             Intent loginIntent = new Intent(this, LoginActivity.class);
             startActivity(loginIntent);
         } else {
@@ -35,6 +36,4 @@ public class LaunchActivity extends AppCompatActivity {
             }
         }
     }
-
-
-    }
+}

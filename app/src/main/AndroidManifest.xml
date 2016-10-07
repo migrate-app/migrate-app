@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -33,11 +34,6 @@
         <activity
             android:name=".TweetFeedActivity"
             android:label="@string/title_activity_main">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-
-            </intent-filter>
         </activity>
         <activity android:name=".SearchActivity" />
 
@@ -45,13 +41,16 @@
          This Activity has no UI. Its the first activity to launch and routes to the correct
         activity, then is cleared from the task stack
         -->
-
         <activity
             android:name=".LaunchActivity"
-            android:noHistory="true"
-          >
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".authentication.LoginActivity"></activity>
+        <activity android:name=".authentication.OAuthActivity"></activity>
     </application>
 
 </manifest>
