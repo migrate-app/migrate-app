@@ -11,14 +11,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.dankideacentral.dic.SearchActivity">
 
-    <AutoCompleteTextView
-        android:text="@string/enter_a_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/searchBar"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
-
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,5 +26,14 @@
         android:id="@+id/searchButton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
+
+    <AutoCompleteTextView
+        android:text="@string/enter_a_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchBar"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="59dp" />
 
 </RelativeLayout>
