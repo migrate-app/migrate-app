@@ -27,6 +27,7 @@
     <!-- Twitter OAuth -->
     <string name="twitter_callback_url">http://www.example.com/</string>
     <string name="twitter_auth_preference" translatable="false">twitter_auth</string>
+    <string name="twitter_auth_secret_preference" translatable="false">twitter_auth_secret</string>
     <string name="url_parameter_twitter_oauth_verifier">oauth_verifier</string>
     <string name="string_extra_authentication_url">AuthenticationUrl</string>
 
@@ -34,6 +35,7 @@
     <string name="preference_twitter_oauth_token">TWITTER_OAUTH_TOKEN</string>
     <string name="preference_twitter_oauth_token_secret">TWITTER_OAUTH_TOKEN_SECRET</string>
     <string name="preference_twitter_logged_in">TWITTER_LOGGED_IN</string>
+    <string name="preference_radius" translatable="false">radius_preference</string>
 
     <!-- SearchActivity String Resources -->
     <string name="location_dialog_title">Oops!</string>
