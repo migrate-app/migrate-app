@@ -34,6 +34,9 @@
         <activity
             android:name=".TweetFeedActivity"
             android:label="@string/title_activity_main">
+            <intent-filter>
+                <action android:name="@string/tweet_broadcast" />
+            </intent-filter>
         </activity>
         <activity android:name=".SearchActivity" />
 
@@ -46,11 +49,17 @@
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".authentication.LoginActivity"></activity>
-        <activity android:name=".authentication.OAuthActivity"></activity>
+        <activity android:name=".authentication.LoginActivity" />
+        <activity android:name=".authentication.OAuthActivity" />
+
+        <service
+            android:name=".TwitterStreamService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

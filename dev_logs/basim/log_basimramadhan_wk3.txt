@@ -1,0 +1,8 @@
+
+Weekly Duties (Hours spent are in brackets)
+Basim Ramadhan - 100901646
+--------------------------------------------
+- Team meeting on Tuesday: discussed major design decisions for the app (2h)
+- Team meeting on Thursday: created new issues for the Bravo milestone (2h)
+- Spent some time learning about essential Android development concepts (3h)
+- Completed the first iteration of the authentication component (8h)
