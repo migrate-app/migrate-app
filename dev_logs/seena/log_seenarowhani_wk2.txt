@@ -1,0 +1,4 @@
+Weekly meetings (4 hrs)
+
+Broadcast Manager (2h)
+Custom Markers (aka android-utils ClusterManager) (2h)
