@@ -33,7 +33,11 @@
 
         <activity
             android:name=".TweetFeedActivity"
-            android:label="@string/title_activity_main"></activity>
+            android:label="@string/title_activity_main">
+            <intent-filter>
+                <action android:name="@string/tweet_broadcast" />
+            </intent-filter>
+        </activity>
         <activity android:name=".SearchActivity" />
 
         <!--

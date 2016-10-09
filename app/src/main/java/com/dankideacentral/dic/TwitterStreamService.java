@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import twitter4j.conf.ConfigurationBuilder;
 public class TwitterStreamService extends Service {
 
     private final IBinder mBinder = new TwitterStreamBinder();
+
     private TwitterStream twitterStream = null;
     private GeolocationFilter geoFilter = null;
     private HashMap<GeoLocation, Integer> locationCount = new HashMap<GeoLocation, Integer>();
@@ -79,9 +81,14 @@ public class TwitterStreamService extends Service {
         public void onStatus(Status status) {
             GeoLocation tweetLocation = status.getGeoLocation();
             Log.d("TwitterStream - tweet", tweetLocation.toString());
+
             if (tweetLocation != null && geoFilter.inSearchRegion(tweetLocation)) {
                 addToLocationCount(tweetLocation);
-                Log.d("TwitterStream - tweet", tweetLocation.toString());
+
+                Intent statusIntent = new Intent(getApplicationContext(), TweetFeedActivity.class);
+                statusIntent.setAction(getString(R.string.tweet_broadcast));
+                statusIntent.putExtra("tweet", status);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(statusIntent);
             }
         }
 
