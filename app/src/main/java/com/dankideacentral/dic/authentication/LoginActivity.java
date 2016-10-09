@@ -29,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Automatically login users that are already authenticated
         // TODO: Add logic to automatically log in authenticated users.
+        // this is implemented in the LauncherActivity
     }
 
     /* Attach a click listener to the login button which starts the authentication process */
@@ -69,6 +70,12 @@ public class LoginActivity extends AppCompatActivity {
             if (requestToken == null) {
                 return; // TODO: Improve error handling when no request token is received.
             }
+            // add token & secret to preferences
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor prefEditor = preferences.edit();
+            prefEditor.putString(getString(R.string.twitter_auth_preference), requestToken.getToken());
+            prefEditor.putString(getString(R.string.twitter_auth_secret_preference), requestToken.getTokenSecret());
+            prefEditor.commit();
 
             // Use a WebView to provide an authentication interface to the user
             Intent intent = new Intent(getApplicationContext(), OAuthActivity.class);
