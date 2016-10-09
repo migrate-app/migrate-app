@@ -1,1 +1,5 @@
-
+Weekly Duties (Hours spent are in brackets)
+Christopher Ermel - 100934583
+--------------------------------------------
+- Meet with team to plan tasks and divide work (2h)
+- Implement button to ask for location permissions & obtain current device location (5h)
