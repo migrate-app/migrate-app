@@ -1,9 +1,11 @@
 package com.dankideacentral.dic;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +35,8 @@ import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.Arrays;
+
+import twitter4j.Status;
 
 public class TweetFeedActivity extends BaseMapActivity
         implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
@@ -52,7 +57,6 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
 
@@ -89,6 +93,17 @@ public class TweetFeedActivity extends BaseMapActivity
         startIntent.putExtra(getString(R.string.intent_long), log);
         startService(startIntent);
         bindService(bindIntent, mConnection, Context.BIND_AUTO_CREATE);
+
+        // set up broadcast reciever
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Status tweet = (Status) intent.getExtras().get("tweet");
+                Log.v("Received Tweet: ", tweet.toString());
+                clusterManager.addItem(new TweetNode(tweet.getGeoLocation()));
+                clusterManager.cluster();
+            }
+        }, new IntentFilter(getString(R.string.tweet_broadcast)));
     }
 
     @Override

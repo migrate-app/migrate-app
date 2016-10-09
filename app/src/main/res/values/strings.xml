@@ -41,5 +41,5 @@
     <!-- TwitterStreamService Intent Strings -->
     <string name = "intent_lat" translatable="false">latitude</string>
     <string name = "intent_long" translatable="false">longitude</string>
-
+    <string name = "tweet_broadcast" translatable="false">com.dankideacentral.dic.TWEET_BROADCAST</string>
 </resources>
