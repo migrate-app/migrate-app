@@ -82,13 +82,14 @@ public class TwitterStreamService extends Service {
             GeoLocation tweetLocation = status.getGeoLocation();
             Log.d("TwitterStream - tweet", tweetLocation.toString());
 
+
             if (tweetLocation != null && geoFilter.inSearchRegion(tweetLocation)) {
                 addToLocationCount(tweetLocation);
-
                 Intent statusIntent = new Intent(getApplicationContext(), TweetFeedActivity.class);
                 statusIntent.setAction(getString(R.string.tweet_broadcast));
                 statusIntent.putExtra("tweet", status);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(statusIntent);
+
             }
         }
 

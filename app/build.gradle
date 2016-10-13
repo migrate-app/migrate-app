@@ -48,7 +48,7 @@ dependencies {
     compile 'org.twitter4j:twitter4j-core:4.0.4'
     compile 'org.twitter4j:twitter4j-stream:4.0.4'
     compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.google.android.gms:play-services:9.6.1'
+    compile 'com.google.android.gms:play-services:9.4.0'
     compile 'com.android.support:design:24.2.0'
     compile 'com.android.support:recyclerview-v7:24.2.0'
     compile 'com.google.maps.android:android-maps-utils:0.4'
