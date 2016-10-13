@@ -92,7 +92,6 @@ public class TweetFeedActivity extends BaseMapActivity
         startIntent.putExtra(getString(R.string.intent_lat), lat);
         startIntent.putExtra(getString(R.string.intent_long), log);
         startService(startIntent);
-        bindService(bindIntent, mConnection, Context.BIND_AUTO_CREATE);
 
         // set up broadcast reciever
         LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
@@ -110,10 +109,7 @@ public class TweetFeedActivity extends BaseMapActivity
     protected void onStop() {
         super.onStop();
         // Unbind from the service
-        if (isBound) {
-            unbindService(mConnection);
-            isBound = false;
-        }
+
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
     }
@@ -179,25 +175,6 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public void onProviderDisabled(String provider) {}
 
-
-
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            TwitterStreamService.TwitterStreamBinder binder = (TwitterStreamService.TwitterStreamBinder) service;
-            mTwitterService = binder.getService();
-            isBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            isBound = false;
-        }
-    };
 
 }
 
