@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -25,15 +26,13 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterStreamService extends Service {
 
-    private final IBinder mBinder = new TwitterStreamBinder();
 
     private TwitterStream twitterStream = null;
     private GeolocationFilter geoFilter = null;
-    private HashMap<GeoLocation, Integer> locationCount = new HashMap<GeoLocation, Integer>();
     public String className = "TwitterStreamService";
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(className, "is running");
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int radius = preferences.getInt(getString(R.string.preference_radius), 20);
         //  TODO: what happens when the auth or auth_secret is empty... we need to stop and return to login
@@ -56,18 +55,12 @@ public class TwitterStreamService extends Service {
         return START_NOT_STICKY;
     }
 
+    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        return null;
     }
 
-
-    public class TwitterStreamBinder extends Binder {
-        TwitterStreamService getService() {
-            return TwitterStreamService.this;
-        }
-
-    }
 
     // listens to the twitter stream
     StatusListener twitterStreamListener = new StatusListener() {
@@ -80,11 +73,9 @@ public class TwitterStreamService extends Service {
         @Override
         public void onStatus(Status status) {
             GeoLocation tweetLocation = status.getGeoLocation();
-            Log.d("TwitterStream - tweet", tweetLocation.toString());
-
 
             if (tweetLocation != null && geoFilter.inSearchRegion(tweetLocation)) {
-                addToLocationCount(tweetLocation);
+                Log.d("TwitterStream - tweet", tweetLocation.toString());
                 Intent statusIntent = new Intent(getApplicationContext(), TweetFeedActivity.class);
                 statusIntent.setAction(getString(R.string.tweet_broadcast));
                 statusIntent.putExtra("tweet", status);
@@ -113,33 +104,6 @@ public class TwitterStreamService extends Service {
 
         }
     };
-
-    private void addToLocationCount(GeoLocation gl) {
-
-        Integer count = locationCount.get(gl);
-        if (count == null) {
-            locationCount.put(gl, 1);
-        } else {
-            locationCount.put(gl, count +1);
-        }
-    }
-
-    // provide a bunch of public methods for the client to get data
-
-    // get location count
-
-    public int getLocationTweetCount(GeoLocation location) {
-        Integer count = 0;
-        if (location != null) {
-            count = locationCount.get(location);
-            return (count != null) ? count : 0;
-        }
-        return 0;
-    }
-
-    public Set<GeoLocation> getLocations() {
-        return locationCount.keySet();
-    }
 
 
 }
