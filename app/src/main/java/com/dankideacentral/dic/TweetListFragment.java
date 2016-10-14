@@ -10,8 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.dankideacentral.dic.dummy.DummyContent;
-import com.dankideacentral.dic.dummy.DummyContent.DummyItem;
+import com.dankideacentral.dic.model.TweetNode;
+
+import java.util.ArrayList;
 
 /**
  * A fragment representing a list of Items.
@@ -26,12 +27,16 @@ public class TweetListFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+    private MyItemRecyclerViewAdapter recyclerViewAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public TweetListFragment() {
+    public TweetListFragment() {}
+
+    public boolean insert (TweetNode item) {
+        return recyclerViewAdapter.insert(item);
     }
 
     // TODO: Customize parameter initialization
@@ -67,11 +72,10 @@ public class TweetListFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyItemRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            recyclerView.setAdapter(recyclerViewAdapter = new MyItemRecyclerViewAdapter(new ArrayList<TweetNode>(), mListener));
         }
         return view;
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -102,6 +106,6 @@ public class TweetListFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(TweetNode item);
     }
 }

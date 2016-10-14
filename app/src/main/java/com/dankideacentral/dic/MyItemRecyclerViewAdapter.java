@@ -7,23 +7,29 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
-import com.dankideacentral.dic.dummy.DummyContent.DummyItem;
+import com.dankideacentral.dic.model.TweetNode;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link TweetNode} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<TweetNode> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyItemRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public MyItemRecyclerViewAdapter(List<TweetNode> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
+    }
+
+    public boolean insert (TweetNode item) {
+        boolean result = mValues.add(item);
+        this.notifyDataSetChanged();
+        return result;
     }
 
     @Override
@@ -36,8 +42,8 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.mIdView.setText(mValues.get(position).getUser().toString());
+        holder.mContentView.setText(mValues.get(position).getText());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,7 +66,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public DummyItem mItem;
+        public TweetNode mItem;
 
         public ViewHolder(View view) {
             super(view);
@@ -74,4 +80,5 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
+
 }

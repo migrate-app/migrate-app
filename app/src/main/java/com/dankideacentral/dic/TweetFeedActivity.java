@@ -2,15 +2,12 @@ package com.dankideacentral.dic;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -23,7 +20,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
-import com.dankideacentral.dic.dummy.DummyContent;
 import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -48,7 +44,7 @@ public class TweetFeedActivity extends BaseMapActivity
     private ClusterManager<TweetNode> clusterManager;
 
     private TwitterStreamService mTwitterService = null;
-    private Fragment listFragment;
+    private TweetListFragment listFragment;
     private Fragmenter fm;
 
     private Button toggleButton;
@@ -86,7 +82,6 @@ public class TweetFeedActivity extends BaseMapActivity
         // lat and long of ottawa
         double lat = 45.421530;
         double log = -75.697193;
-        Intent bindIntent = new Intent(this, TwitterStreamService.class);
         Intent startIntent = new Intent(this, TwitterStreamService.class);
         // put the radius and location on the intent
         startIntent.putExtra(getString(R.string.intent_lat), lat);
@@ -98,8 +93,10 @@ public class TweetFeedActivity extends BaseMapActivity
             @Override
             public void onReceive(Context context, Intent intent) {
                 Status tweet = (Status) intent.getExtras().get("tweet");
+                TweetNode tweetNode = new TweetNode(tweet);
                 Log.v("Received Tweet: ", tweet.toString());
-                clusterManager.addItem(new TweetNode(tweet.getGeoLocation()));
+                clusterManager.addItem(tweetNode);
+                listFragment.insert(tweetNode);
                 clusterManager.cluster();
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
@@ -139,7 +136,7 @@ public class TweetFeedActivity extends BaseMapActivity
     }
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+    public void onListFragmentInteraction(TweetNode item) {
         Snackbar.make(findViewById(R.id.activity_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
     }
 
@@ -161,9 +158,6 @@ public class TweetFeedActivity extends BaseMapActivity
         Log.d("LOCATION_LISTENER", currentLocation.toString());
 
         getMap().moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-
-        clusterManager.addItem(new TweetNode(currentLocation));
-        clusterManager.cluster();
     }
 
     @Override
