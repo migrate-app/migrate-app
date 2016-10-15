@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,6 +37,7 @@ import twitter4j.Status;
 
 public class TweetFeedActivity extends BaseMapActivity
         implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
+
     private static final int PERMISSION_REQUEST_LOCATION = 0;
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
 
@@ -43,18 +45,22 @@ public class TweetFeedActivity extends BaseMapActivity
     private static final int MIN_DISTANCE = 0;
     private ClusterManager<TweetNode> clusterManager;
 
-    private TwitterStreamService mTwitterService = null;
     private TweetListFragment listFragment;
     private Fragmenter fm;
 
     private Button toggleButton;
-    private boolean isBound = false;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
+
+        // Set the navigation icon of the tool bar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_nav_button);
+
+        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer
 
         listFragment = new TweetListFragment();
 

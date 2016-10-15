@@ -1,9 +1,8 @@
 package com.dankideacentral.dic;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.location.LocationManager;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 
 import com.dankideacentral.dic.model.TweetNode;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,7 +14,7 @@ import com.google.maps.android.clustering.ClusterManager;
  * Created by srowhani on 10/6/16.
  */
 
-public abstract class BaseMapActivity extends FragmentActivity implements OnMapReadyCallback{
+public abstract class BaseMapActivity extends AppCompatActivity implements OnMapReadyCallback{
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
 
