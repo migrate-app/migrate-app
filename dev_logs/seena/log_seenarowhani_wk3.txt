@@ -1,0 +1,2 @@
+- Base Settings Activity (2h)
+- Adjusted TweetNode, ListAdapter, and ListFragment to handle real data.
