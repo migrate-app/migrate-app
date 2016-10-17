@@ -1,1 +1,8 @@
-
+Weekly Duties
+Christopher Ermel - 100934583
+Hours Spent: (6h)
+--------------------------------------------
+- Meet with team to plan tasks and divide work 
+- Investigate & fix a bug where Google Maps was not showing up for 3 of the 4 developers
+- Add custom toolbar with nav button to TweetFeedActivity
+- Begin coding of location auto complete search field
