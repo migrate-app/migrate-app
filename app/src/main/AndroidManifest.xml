@@ -35,7 +35,7 @@
             android:name=".TweetFeedActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
-                <action android:name="@string/tweet_broadcast" />
+                <action android:name="com.dankideacentral.dic.TWEET_BROADCAST" />
             </intent-filter>
         </activity>
         <activity android:name=".SearchActivity" />

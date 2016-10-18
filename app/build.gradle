@@ -7,7 +7,6 @@ buildscript {
 }
 apply plugin: 'com.android.application'
 
-Properties props = new Properties()
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.2"
@@ -24,14 +23,10 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField "String", "CONSUMER_KEY", "\"${props.getProperty("twitterConsumerKey")}\""
-            buildConfigField "String", "CONSUMER_SECRET", "\"${props.getProperty("twitterConsumerSecret")}\""
             ext.enableCrashlytics = false
         }
         release {
             minifyEnabled false
-            buildConfigField "String", "CONSUMER_KEY", "\"${props.getProperty("twitterConsumerKey")}\""
-            buildConfigField "String", "CONSUMER_SECRET", "\"${props.getProperty("twitterConsumerSecret")}\""
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
