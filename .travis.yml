@@ -21,7 +21,7 @@ before_install:
   - go get github.com/aktau/github-release
 after_script:
   - github-release release --user dankideacentral --repo migrate-app --tag v$(cat .version) --name $(cat .version) --description "Built by your friendly neighbourhood Travis CI" --pre-release
-  - github-release upload  --user dankideacentral --repo migrate-app  --tag v$(cat .version) --name "release.apk" --file "app/build/outputs/apk/app-release.apk"
+  - github-release upload  --user dankideacentral --repo migrate-app  --tag v$(cat .version) --name "release.apk" --file "app/app-release.apk"
 script:
   - ./gradlew -s clean assemble
   - ./gradlew assembleRelease -Pandroid.injected.signing.store.file=.credentials/key.jks -Pandroid.injected.signing.store.password=$STORE_PASSWORD -Pandroid.injected.signing.key.alias=migrate -Pandroid.injected.signing.key.password=$STORE_PASSWORD
