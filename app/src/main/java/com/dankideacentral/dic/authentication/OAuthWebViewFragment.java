@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -18,16 +19,11 @@ public class OAuthWebViewFragment extends Fragment {
     private WebView webView;
     private String authenticationUrl;
 
-    // FIXME: I added this default constructor to stop Android Studio from complaining
-    public OAuthWebViewFragment() {}
-
-    public OAuthWebViewFragment(String authenticationUrl) {
-        this.authenticationUrl = authenticationUrl;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String authUrl = getArguments().getString(getString(R.string.string_extra_authentication_url));
+        this.authenticationUrl = authUrl;
     }
 
     @Override
@@ -37,7 +33,8 @@ public class OAuthWebViewFragment extends Fragment {
         webView.setWebViewClient(new WebViewClient()
         {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
                 if (url.contains("oauth_verifier=")) {
                     Intent intent = new Intent(getActivity().getApplicationContext(), TweetFeedActivity.class);
                     intent.setData(Uri.parse(url));
