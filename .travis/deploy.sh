@@ -1,6 +1,5 @@
 #!/bin/bash
 set -ev
-bundle exec rake:units
 if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then
   ./gradlew assembleRelease \
      -Pandroid.injected.signing.store.file=.credentials/key.jks \
