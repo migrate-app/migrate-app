@@ -46,15 +46,24 @@
         android:id="@+id/searchButton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginEnd="16dp"
+        android:enabled="false"/>
 
-    <AutoCompleteTextView
-        android:text="@string/enter_a_location"
+    <TextView
+        android:id="@+id/places_autocomplete_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/searchBar"
-        android:layout_marginTop="11dp"
+        android:text="@string/place_autocomplete_text"
+        android:layout_marginTop="12dp"
         android:layout_below="@+id/toolbar"
+        android:layout_alignStart="@+id/locationButton" />
+
+    <fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

@@ -122,4 +122,5 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="place_autocomplete_text">Search for a place:</string>
 </resources>
