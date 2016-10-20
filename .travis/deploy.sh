@@ -9,13 +9,13 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then
   github-release release \
     --user dankideacentral \
     --repo migrate-app \
-    --tag v$(cat .version) \
-    --name $(cat .version) \
+    --tag "v$(cat .version)" \
+    --name "$(cat .version)" \
     --description "Built by your friendly neighbourhood Travis CI"
   github-release upload  \
     --user dankideacentral \
     --repo migrate-app  \
-    --tag v$(cat .version) \
+    --tag "v$(cat .version)" \
     --name "migrate-release-$(date +%Y-%m-%d)-v$(cat .version).apk" \
     --file "app/build/outputs/apk/app-release.apk"
 fi
