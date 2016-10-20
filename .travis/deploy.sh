@@ -16,6 +16,6 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then
     --user dankideacentral \
     --repo migrate-app  \
     --tag "v$(cat .version)" \
-    --name "migrate-release-$(date +%Y-%m-%d)-v$(cat .version).apk" \
+    --name "release.apk" \
     --file "app/build/outputs/apk/app-release.apk"
 fi
