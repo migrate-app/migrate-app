@@ -21,6 +21,6 @@ before_install:
   - go get github.com/aktau/github-release
 script:
   - ./gradlew -s clean assemble
-deploy:
-  provider: script
-  script: .travis/deploy.sh
+after_script:
+  - .travis/deploy.sh
+  
