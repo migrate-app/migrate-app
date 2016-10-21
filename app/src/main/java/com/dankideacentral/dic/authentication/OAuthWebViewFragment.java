@@ -27,8 +27,7 @@ public class OAuthWebViewFragment extends Fragment {
         webView.setWebViewClient(new WebViewClient()
         {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString();
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("oauth_verifier=")) {
                     Intent intent = new Intent(getActivity().getApplicationContext(), TweetFeedActivity.class);
                     intent.setData(Uri.parse(url));
