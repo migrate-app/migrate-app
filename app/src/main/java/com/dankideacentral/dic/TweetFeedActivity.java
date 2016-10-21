@@ -8,11 +8,10 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -25,7 +24,6 @@ import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
@@ -84,28 +82,8 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onStart() {
         super.onStart();
-        // Start and bind TwitterStreamService
-        // lat and long of ottawa
-        double lat = 45.421530;
-        double log = -75.697193;
-        Intent startIntent = new Intent(this, TwitterStreamService.class);
-        // put the radius and location on the intent
-        startIntent.putExtra(getString(R.string.intent_lat), lat);
-        startIntent.putExtra(getString(R.string.intent_long), log);
-        startService(startIntent);
 
-        // set up broadcast reciever
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Status tweet = (Status) intent.getExtras().get("tweet");
-                TweetNode tweetNode = new TweetNode(tweet);
-                Log.v("Received Tweet: ", tweet.toString());
-                clusterManager.addItem(tweetNode);
-                listFragment.insert(tweetNode);
-                clusterManager.cluster();
-            }
-        }, new IntentFilter(getString(R.string.tweet_broadcast)));
+        // TODO: Remove if mapReady works
     }
 
     @Override
@@ -125,6 +103,35 @@ public class TweetFeedActivity extends BaseMapActivity
 
     @Override
     public void mapReady(GoogleMap map, LocationManager lm, final ClusterManager cm) {
+        // Grab LatLng object from intent extra
+        LatLng latLngBundle = (LatLng) getIntent().getParcelableExtra(getString(
+                R.string.search_location_key));
+
+        getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLngBundle, 10));
+
+        double lat = latLngBundle.latitude;
+        double log = latLngBundle.longitude;
+
+        // Start and bind TwitterStreamService
+        Intent startIntent = new Intent(this, TwitterStreamService.class);
+        // put the radius and location on the intent
+        startIntent.putExtra(getString(R.string.intent_lat), lat);
+        startIntent.putExtra(getString(R.string.intent_long), log);
+        startService(startIntent);
+
+        // set up broadcast reciever
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Status tweet = (Status) intent.getExtras().get("tweet");
+                TweetNode tweetNode = new TweetNode(tweet);
+                Log.v("Received Tweet: ", tweet.toString());
+                clusterManager.addItem(tweetNode);
+                listFragment.insert(tweetNode);
+                clusterManager.cluster();
+            }
+        }, new IntentFilter(getString(R.string.tweet_broadcast)));
+
         clusterManager = cm;
 
         clusterManager.setOnClusterClickListener(this);
@@ -140,7 +147,6 @@ public class TweetFeedActivity extends BaseMapActivity
             Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
         }
     }
-
     @Override
     public void onListFragmentInteraction(TweetNode item) {
         Snackbar.make(findViewById(R.id.activity_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
