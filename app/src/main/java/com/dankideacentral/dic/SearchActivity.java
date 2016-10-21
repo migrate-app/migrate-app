@@ -12,11 +12,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -37,9 +42,43 @@ public class SearchActivity extends AppCompatActivity
 
     private ImageButton locationButton;
     private Button searchButton;
+    private PlaceAutocompleteFragment autocompleteFragment;
     private PackageManager packageManager;
     private AlertDialog.Builder alertBuilder;
     private GoogleApiClient googleApiClient;
+    private LatLng currentLatLng;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Get packageManager
+        packageManager = this.getPackageManager();
+
+        // Instantiate alertBuilder
+        alertBuilder = new AlertDialog.Builder(this);
+
+        // Instantiate GoogleAPIClient
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+        setContentView(R.layout.activity_search);
+
+        // Retrieve button & fragment views from resources
+        locationButton = (ImageButton) findViewById(R.id.locationButton);
+        searchButton = (Button) findViewById(R.id.searchButton);
+        autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        // Sets the google places autocomplete listeners
+        setAutocompleteListeners();
+
+        // Sets the onclick event listeners for each button in the activity
+        setOnClickListeners();
+    }
 
     /**
      * Callback function that occurs when a permission has been
@@ -72,7 +111,7 @@ public class SearchActivity extends AppCompatActivity
                 Location location = getCurrentLocation();
 
                 // Handle device location response
-                handleCurrentLocation(location);
+                handleLocationSend(location);
             }
         }
     }
@@ -115,33 +154,6 @@ public class SearchActivity extends AppCompatActivity
         Log.d(LOG_TAG, "GoogleApiClient connection failed.");
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Get packageManager
-        packageManager = this.getPackageManager();
-
-        // Instantiate alertBuilder
-        alertBuilder = new AlertDialog.Builder(this);
-
-        // Instantiate GoogleAPIClient
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-        setContentView(R.layout.activity_search);
-
-        // Retrieve button views from resources
-        locationButton = (ImageButton) findViewById(R.id.locationButton);
-        searchButton = (Button) findViewById(R.id.searchButton);
-
-        // Sets the onclick event listeners for each button in the activity
-        setOnClickListeners();
-    }
-
     /**
      * On activity startup, connects to the {@link GoogleApiClient}.
      */
@@ -175,7 +187,7 @@ public class SearchActivity extends AppCompatActivity
         // Sets the onClick event listener for the search button
         searchButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View view) {
-                // TODO: Implement search on click event
+                sendLatLngObject(currentLatLng);
             }
         });
     }
@@ -205,7 +217,7 @@ public class SearchActivity extends AppCompatActivity
             // Case permission is enabled - obtain device's location
             Location location = getCurrentLocation();
 
-            handleCurrentLocation(location);
+            handleLocationSend(location);
         }
     }
 
@@ -239,7 +251,7 @@ public class SearchActivity extends AppCompatActivity
      *
      * If location was successfully obtained, pass control to the
      * {@link TweetFeedActivity} passing a {@link LatLng} object
-     * in a {@link Bundle} object.
+     * in a {@link Bundle}.
      *
      * If location acquisition failed, alerts the user by displaying
      * an {@link AlertDialog}.
@@ -247,23 +259,14 @@ public class SearchActivity extends AppCompatActivity
      * @param location
      *          The location object we are handling.
      */
-    private void handleCurrentLocation(Location location) {
+    private void handleLocationSend(Location location) {
         // Case location successfully obtained
         if (location != null) {
             // Parcel a LatLng object to be sent as a Bundle to the TweetFeedActivity
             LatLng currentLocation = new LatLng(location.getLatitude(),
                     location.getLongitude());
 
-            // Bundle up the LatLng object identified by search_location_key
-            Bundle locationBundle = new Bundle();
-            locationBundle.putParcelable(getString(R.string.search_location_key),
-                    currentLocation);
-
-            // Open TweetFeedActivity and send latitude and longitude bundle as an extra
-            Intent mapIntent = new Intent(this, TweetFeedActivity.class);
-            mapIntent.putExtras(locationBundle);
-
-            startActivity(mapIntent);
+            sendLatLngObject(currentLocation);
         } else {
             // Build dialog to inform user that obtaining location failed
             alertBuilder.setMessage(R.string.location_dialog_message)
@@ -273,5 +276,67 @@ public class SearchActivity extends AppCompatActivity
             // Create & show the dialog box
             alertBuilder.create().show();
         }
+    }
+
+    /**
+     * Bundles a {@link LatLng} object and sends it to
+     * the {@link TweetFeedActivity}.
+     *
+     * @param latLng
+     *          The object containing latitude and longitude values.
+     */
+    private void sendLatLngObject(LatLng latLng) {
+        // Bundle up the LatLng object identified by search_location_key
+        Bundle locationBundle = new Bundle();
+        locationBundle.putParcelable(getString(R.string.search_location_key),
+                latLng);
+
+        // Open TweetFeedActivity and send latitude and longitude bundle as an extra
+        Intent mapIntent = new Intent(this, TweetFeedActivity.class);
+        mapIntent.putExtras(locationBundle);
+
+        startActivity(mapIntent);
+    }
+
+    /**
+     * Sets all listeners associated with the Google Places Autocomplete fragment.
+     */
+    private void setAutocompleteListeners() {
+        autocompleteFragment.getView().findViewById(R.id.place_autocomplete_clear_button)
+                .setOnClickListener(new View.OnClickListener() {
+                    // Overrides clear button in the autocomplete fragment
+                    @Override
+                    public void onClick(View view) {
+                        // Clear the text box
+                        ((EditText) autocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input)).setText("");
+                        view.setVisibility(View.GONE);
+
+                        // Unset the currentLatLng object
+                        currentLatLng = null;
+
+                        // Disable the button
+                        searchButton.setEnabled(false);
+                    }
+        });
+
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            // Implements the listener for when the place field is filled
+            @Override
+            public void onPlaceSelected(Place place) {
+                Log.i(LOG_TAG, "Places autocomplete selected: " + place.getName());
+
+                // Set the current LatLng object
+                currentLatLng = place.getLatLng();
+
+                // Set the search button to be enabled
+                searchButton.setEnabled(true);
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.i(LOG_TAG, "An error occurred with the autocomplete text view: " + status);
+            }
+        });
     }
 }
