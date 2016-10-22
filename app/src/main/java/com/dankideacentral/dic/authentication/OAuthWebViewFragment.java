@@ -17,24 +17,17 @@ import com.dankideacentral.dic.R;
 
 public class OAuthWebViewFragment extends Fragment {
     private WebView webView;
-    private String authenticationUrl;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        String authUrl = getArguments().getString(getString(R.string.string_extra_authentication_url));
-        this.authenticationUrl = authUrl;
-    }
-
+    public OAuthWebViewFragment () {}
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        webView.loadUrl(authenticationUrl);
+        String auth = getArguments().getString(getString(R.string.string_extra_authentication_url));
+
+        webView.loadUrl(auth);
         webView.setWebViewClient(new WebViewClient()
         {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                String url = request.getUrl().toString();
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("oauth_verifier=")) {
                     Intent intent = new Intent(getActivity().getApplicationContext(), TweetFeedActivity.class);
                     intent.setData(Uri.parse(url));
@@ -45,13 +38,15 @@ public class OAuthWebViewFragment extends Fragment {
             }
         });
         WebSettings webSettings = webView.getSettings();
+
+        webSettings.setDomStorageEnabled(true);
         webSettings.setJavaScriptEnabled(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_oauth_webview,container,false);
-        webView = (WebView)view.findViewById(R.id.webViewOAuth);
+        webView = (WebView) view.findViewById(R.id.webViewOAuth);
         return view;
     }
 }
