@@ -11,9 +11,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.dankideacentral.dic.util.LocationUtil;
+
 import java.util.HashMap;
 import java.util.Set;
 
+import twitter4j.FilterQuery;
 import twitter4j.GeoLocation;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -37,12 +40,17 @@ public class TwitterStreamService extends Service {
         int radius = preferences.getInt(getString(R.string.preference_radius), 20);
         //  TODO: what happens when the auth or auth_secret is empty... we need to stop and return to login
         String authToken = preferences.getString(getString(R.string.twitter_auth_preference), null);
-        String authTokenSecret = preferences.getString(getString(R.string.twitter_auth_secret_preference), null);
+        String authTokenSecret = preferences.getString(
+                getString(R.string.twitter_auth_secret_preference), null);
         AccessToken accessToken = new AccessToken(getString(R.string.twitter_access_key),
                 getString(R.string.twitter_access_secret));
+
         double lat = intent.getDoubleExtra(getString(R.string.intent_lat), 0.0);
         double lon = intent.getDoubleExtra(getString(R.string.intent_long), 0.0);
-        geoFilter = new GeolocationFilter(lat, lon, radius);
+
+        FilterQuery mFilter = new FilterQuery();
+        mFilter.locations(LocationUtil.coordinatesToBoundingBox(lat, lon, radius));
+
         // set up the twitter stream
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(getString(R.string.twitter_consumer_key))
@@ -51,6 +59,7 @@ public class TwitterStreamService extends Service {
                 .setOAuthAccessTokenSecret(authTokenSecret);
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance(accessToken);
         twitterStream.addListener(twitterStreamListener);
+        twitterStream.filter(mFilter);
         twitterStream.sample();
         return START_NOT_STICKY;
     }
@@ -64,18 +73,19 @@ public class TwitterStreamService extends Service {
 
     // listens to the twitter stream
     StatusListener twitterStreamListener = new StatusListener() {
-
+        private final String TAG = "TwitterStreamListener";
         @Override
         public void onException(Exception ex) {
-
+            Log.e(TAG.concat("- Exception"), ex.getMessage());
         }
 
         @Override
         public void onStatus(Status status) {
+            Log.d(TAG.concat("- Tweet"), status.toString());
             GeoLocation tweetLocation = status.getGeoLocation();
 
-            if (tweetLocation != null && geoFilter.inSearchRegion(tweetLocation)) {
-                Log.d("TwitterStream - tweet", tweetLocation.toString());
+            if (tweetLocation != null) {
+                Log.d(TAG.concat("- GeoTweet"), tweetLocation.toString());
                 Intent statusIntent = new Intent(getApplicationContext(), TweetFeedActivity.class);
                 statusIntent.setAction(getString(R.string.tweet_broadcast));
                 statusIntent.putExtra("tweet", status);

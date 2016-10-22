@@ -102,7 +102,6 @@ public class TweetFeedActivity extends BaseMapActivity
                 TweetNode tweetNode = new TweetNode(tweet);
                 Log.v("Received Tweet: ", tweet.toString());
                 clusterManager.addItem(tweetNode);
-                listFragment.insert(tweetNode);
                 clusterManager.cluster();
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
@@ -127,6 +126,7 @@ public class TweetFeedActivity extends BaseMapActivity
     public void mapReady(GoogleMap map, LocationManager lm, final ClusterManager cm) {
         clusterManager = cm;
 
+        map.setOnCameraChangeListener(cm);
         clusterManager.setOnClusterClickListener(this);
         clusterManager.setOnClusterItemClickListener(this);
 

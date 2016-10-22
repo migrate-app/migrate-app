@@ -41,13 +41,23 @@ public class TweetNode extends WeightedNode {
         this.status = null;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     @Override
     public LatLng getPosition() {
         return position;
     }
 
     @Override
-    public float getWeight() {
-        return 0;
+    public int getWeight() {
+        return ((int) Math.ceil(
+            Math.log(status.getFavoriteCount()) +
+            Math.log(status.getRetweetCount()) +
+            (status.getUser().isVerified() ? 1 : 0))
+        );
+
+
     }
 }
