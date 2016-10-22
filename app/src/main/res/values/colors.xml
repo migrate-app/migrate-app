@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#13A38D</color>
+    <color name="colorPrimaryDark">#0F8271</color>
     <color name="colorAccent">#FF4081</color>
 
     <!-- Migrate's Color Scheme-->
-    <color name="migrateBlue">#0071BB</color>
+    <color name="migrateGreen">#13A38D</color>
 
 </resources>
