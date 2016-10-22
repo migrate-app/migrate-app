@@ -30,7 +30,8 @@ public class TwitterStreamService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int radius = preferences.getInt(getString(R.string.preference_radius), 20);
+        int radius = preferences.getInt(getString(R.string.preference_radius), 250); // radius in km
+        Log.d("RADIUS_PREF", radius + "");
         //  TODO: what happens when the auth or auth_secret is empty... we need to stop and return to login
         String authToken = preferences.getString(getString(R.string.twitter_auth_preference), null);
         String authTokenSecret = preferences.getString(
@@ -43,7 +44,6 @@ public class TwitterStreamService extends Service {
 
         FilterQuery mFilter = new FilterQuery();
         mFilter.locations(GeolocationFilter.coordinatesToBoundingBox(lat, lon, radius));
-
         // set up the twitter stream
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(getString(R.string.twitter_consumer_key))
@@ -52,8 +52,8 @@ public class TwitterStreamService extends Service {
                 .setOAuthAccessTokenSecret(authTokenSecret);
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance(accessToken);
         twitterStream.addListener(twitterStreamListener);
+        // Begin filter stream
         twitterStream.filter(mFilter);
-        twitterStream.sample();
         return START_NOT_STICKY;
     }
 
