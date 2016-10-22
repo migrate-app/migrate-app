@@ -1,20 +1,13 @@
 package com.dankideacentral.dic;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import com.dankideacentral.dic.util.LocationUtil;
-
-import java.util.HashMap;
-import java.util.Set;
 
 import twitter4j.FilterQuery;
 import twitter4j.GeoLocation;
@@ -49,7 +42,7 @@ public class TwitterStreamService extends Service {
         double lon = intent.getDoubleExtra(getString(R.string.intent_long), 0.0);
 
         FilterQuery mFilter = new FilterQuery();
-        mFilter.locations(LocationUtil.coordinatesToBoundingBox(lat, lon, radius));
+        mFilter.locations(GeolocationFilter.coordinatesToBoundingBox(lat, lon, radius));
 
         // set up the twitter stream
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()

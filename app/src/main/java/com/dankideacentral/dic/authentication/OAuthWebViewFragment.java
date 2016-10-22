@@ -17,7 +17,6 @@ import com.dankideacentral.dic.R;
 
 public class OAuthWebViewFragment extends Fragment {
     private WebView webView;
-    public OAuthWebViewFragment () {}
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
