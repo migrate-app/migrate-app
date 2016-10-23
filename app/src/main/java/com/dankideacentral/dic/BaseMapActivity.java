@@ -19,8 +19,7 @@ public abstract class BaseMapActivity extends AppCompatActivity implements OnMap
     private SupportMapFragment mapFragment;
 
     public BaseMapActivity () {
-        mapFragment = new SupportMapFragment();
-        mapFragment.getMapAsync(this);
+        mapFragment = SupportMapFragment.newInstance();
     }
 
     public GoogleMap getMap () {
