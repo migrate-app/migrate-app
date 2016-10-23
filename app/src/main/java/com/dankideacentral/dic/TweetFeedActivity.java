@@ -123,6 +123,49 @@ public class TweetFeedActivity extends BaseMapActivity
         }
     }
 
+    @Override
+    public void onListFragmentInteraction(TweetNode item) {
+        Snackbar.make(findViewById(R.id.activity_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onClusterClick(Cluster cluster) {
+        Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
+        return true;
+    }
+    @Override
+    public boolean onClusterItemClick(ClusterItem clusterItem) {
+        Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
+        return false;
+    }
+
+    @Override
+    public void onLocationChanged(Location loc) {
+        LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+
+        Log.d("LOCATION_LISTENER", currentLocation.toString());
+
+        getMap().moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+    @Override
+    public void onProviderEnabled(String provider) {}
+
+    @Override
+    public void onProviderDisabled(String provider) {}
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+
+        Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
+        stopService(stopServiceIntent);
+    }
+
     /**
      * Creates a new instance of a {@link LocationFinder} object,
      * implementing its onLocationChanged() method to guarantee
@@ -170,48 +213,5 @@ public class TweetFeedActivity extends BaseMapActivity
         startIntent.putExtra(getString(R.string.intent_lat), lat);
         startIntent.putExtra(getString(R.string.intent_long), log);
         startService(startIntent);
-    }
-
-    @Override
-    public void onListFragmentInteraction(TweetNode item) {
-        Snackbar.make(findViewById(R.id.activity_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
-    }
-
-    @Override
-    public boolean onClusterClick(Cluster cluster) {
-        Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
-        return true;
-    }
-    @Override
-    public boolean onClusterItemClick(ClusterItem clusterItem) {
-        Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
-        return false;
-    }
-
-    @Override
-    public void onLocationChanged(Location loc) {
-        LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
-
-        Log.d("LOCATION_LISTENER", currentLocation.toString());
-
-        getMap().moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-    @Override
-    public void onProviderEnabled(String provider) {}
-
-    @Override
-    public void onProviderDisabled(String provider) {}
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Unbind from the service
-
-        Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
-        stopService(stopServiceIntent);
     }
 }
