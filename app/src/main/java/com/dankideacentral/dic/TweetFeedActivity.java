@@ -36,7 +36,7 @@ import java.util.Arrays;
 import twitter4j.Status;
 
 public class TweetFeedActivity extends BaseMapActivity
-        implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
+        implements OnListFragmentInteractionListener, LocationListener {
 
     private static final int PERMISSION_REQUEST_LOCATION = 0;
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
@@ -125,10 +125,6 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public void mapReady(GoogleMap map, LocationManager lm, final ClusterManager cm) {
         clusterManager = cm;
-
-        map.setOnCameraChangeListener(cm);
-        clusterManager.setOnClusterClickListener(this);
-        clusterManager.setOnClusterItemClickListener(this);
 
         try {
             lm.requestLocationUpdates(
