@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.util;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,7 +14,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 /**
- * Created by Chris on 10/21/2016.
+ * Class:   LocationFinder.java
+ * Purpose: Utility to help search for the device's
+ *          current location.
+ *
+ * @author Chris Ermel
+ * @version 1.0
+ * @since 2016-10-23
  */
 public abstract class LocationFinder implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -24,11 +30,7 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
     private GoogleApiClient googleApiClient;
     private Context context;
 
-    /**
-     *
-     * @param context
-     */
-    public LocationFinder(Context context) {
+    protected LocationFinder(Context context) {
         this.context = context;
 
         // Instantiate GoogleAPIClient with given context
@@ -58,14 +60,15 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
     }
 
     /**
-     *
+     * Disconnects the {@link LocationFinder}'s
+     * {@link GoogleApiClient}.
      */
     public void disconnect() {
         googleApiClient.disconnect();
     }
 
     /**
-     *
+     * Starts a request for location updates from the {@link GoogleApiClient}.
      */
     private void startLocationUpdates() {
         try {
@@ -76,10 +79,13 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
             Log.d(LOG_TAG, "Location permissions deactivated when attempting to recover location.");
 
             // Toast small message to user
-            Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Location services turned off.", Toast.LENGTH_LONG).show();
         }
     }
 
+    /**
+     * Stops the {@link GoogleApiClient}'s listening for location updates.
+     */
     public void stopLocationUpdates() {
         // Stop location updates from occurring
         LocationServices.FusedLocationApi.removeLocationUpdates(

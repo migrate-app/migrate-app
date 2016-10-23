@@ -13,7 +13,6 @@ import com.google.maps.android.clustering.ClusterManager;
 /**
  * Created by srowhani on 10/6/16.
  */
-
 public abstract class BaseMapActivity extends AppCompatActivity implements OnMapReadyCallback{
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;

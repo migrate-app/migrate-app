@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
@@ -150,7 +151,11 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO
+     * Creates a new instance of a {@link LocationFinder} object,
+     * implementing its onLocationChanged() method to guarantee
+     * reception of current known location.
+     *
+     * Once location is received, passes focus to the {@link TweetFeedActivity}.
      */
     private void getCurrentLocation() {
         // Acquire location from the device by initializing a locationFinder object

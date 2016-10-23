@@ -10,9 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +20,7 @@ import android.widget.Toast;
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.util.Fragmenter;
+import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -42,25 +41,17 @@ public class TweetFeedActivity extends BaseMapActivity
     private static final int MIN_TIME = 250; //milliseconds
     private static final int MIN_DISTANCE = 0;
 
-    // OTTAWA LAT AND LONG CONSTANTS
-    private static final double OTTAWA_LATITUDE = 45.4215;
-    private static final double OTTAWA_LONGITUDE = -75.6972;
-
     private ClusterManager<TweetNode> clusterManager;
 
     private TweetListFragment listFragment;
     private Fragmenter fm;
     private LocationFinder locationFinder;
-    private AlertDialog.Builder alertBuilder;
 
     private Button toggleButton;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Instantiate alertBuilder
-        alertBuilder = new AlertDialog.Builder(this);
 
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
@@ -128,12 +119,17 @@ public class TweetFeedActivity extends BaseMapActivity
                     MIN_DISTANCE,
                     this);
         } catch (SecurityException e) {
-            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Location services turned off.", Toast.LENGTH_LONG).show();
         }
     }
 
     /**
+     * Creates a new instance of a {@link LocationFinder} object,
+     * implementing its onLocationChanged() method to guarantee
+     * reception of current known location.
      *
+     * Once location is received, zooms the map fragment in to
+     * the received location.
      */
     private void getCurrentLocation() {
         locationFinder = new LocationFinder(this) {
@@ -158,8 +154,11 @@ public class TweetFeedActivity extends BaseMapActivity
     }
 
     /**
+     * Starts the twitter stream service to receive
+     * tweets at the specified latitude & longitude locations.
      *
      * @param latLng
+     *          The {@link LatLng} location to open the service at.
      */
     private void startTwitterStreamService(LatLng latLng) {
         double lat = latLng.latitude;
@@ -208,13 +207,6 @@ public class TweetFeedActivity extends BaseMapActivity
     public void onProviderDisabled(String provider) {}
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        // TODO: Remove if mapReady works
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
         // Unbind from the service
@@ -222,39 +214,4 @@ public class TweetFeedActivity extends BaseMapActivity
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
     }
-
-    private void requestPermission(String requestedPermission, int grantedPermission) {
-        if (ContextCompat.checkSelfPermission(this, requestedPermission) != 0)
-            requestPermissions(new String[]{requestedPermission}, grantedPermission);
-    }
-
-    /**
-     *
-     * @param location
-     * @return
-     */
-    private LatLng handleLocationGet(Location location) {
-        // Case location successfully obtained
-        if (location != null) {
-            // Pull the location's latitude & longitude params into a LatLng object
-            LatLng currentLocation = new LatLng(location.getLatitude(),
-                    location.getLongitude());
-
-            // Return the obtained LatLng object
-            return currentLocation;
-        } else {
-            // Build dialog to inform user that obtaining location failed
-            alertBuilder.setMessage(R.string.location_dialog_message)
-                    .setTitle(R.string.location_dialog_title)
-                    .setNeutralButton(R.string.location_dialog_okay, null);
-
-            // Create & show the dialog box
-            alertBuilder.create().show();
-
-            // Return LatLng of Ottawa if could not obtain the location
-            return new LatLng(OTTAWA_LATITUDE, OTTAWA_LONGITUDE);
-        }
-    }
 }
-
-
