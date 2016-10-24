@@ -1,1 +1,9 @@
-
+Weekly Duties
+Christopher Ermel - 100934583
+Hours Spent: (8h)
+--------------------------------------------
+- Meet with team to plan tasks and divide work 
+- Finish autocomplete feature
+- Fix location acquisition function
+- Use location passed to TweetFeedActivity to zoom map in & init Tweet Stream
+- Begin investigating implementation of NavDrawer for the TweetFeedActivity
