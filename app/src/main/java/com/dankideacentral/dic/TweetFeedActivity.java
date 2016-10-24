@@ -8,9 +8,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -52,19 +54,19 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
 
-        // Set the navigation icon of the tool bar
+        // Set the navigation icon of the tool bar & its onClick listener
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
+        View navDrawer = setUpNavigationDrawer();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
-
-        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer
+        setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
 
         listFragment = new TweetListFragment();
 
-        fm.create(R.id.activity_tweet_feed, getFragment(), CURRENT_FRAGMENT);
+        fm.create(R.id.layout_tweet_feed, getFragment(), CURRENT_FRAGMENT);
         getFragment().getMapAsync(this);
 
         toggleButton = (Button) findViewById(R.id.toggle);
@@ -75,7 +77,7 @@ public class TweetFeedActivity extends BaseMapActivity
                         instanceof TweetListFragment
                             ? getFragment()
                             : listFragment;
-                fm.create(R.id.activity_tweet_feed, current, CURRENT_FRAGMENT);
+                fm.create(R.id.layout_tweet_feed, current, CURRENT_FRAGMENT);
             }
         });
     }
@@ -174,7 +176,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
     @Override
     public void onListFragmentInteraction(TweetNode item) {
-        Snackbar.make(findViewById(R.id.activity_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(R.id.layout_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -213,5 +215,47 @@ public class TweetFeedActivity extends BaseMapActivity
 
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
+    }
+
+    /**
+     * Sets up the activity's {@link NavigationView}.
+     *
+     * Inflates its header and menu items.
+     *
+     * @return
+     *          An initialized {@link NavigationView} object.
+     */
+    private NavigationView setUpNavigationDrawer() {
+        NavigationView navDrawer = (NavigationView) findViewById(R.id.nav_drawer);
+
+        // TODO: Inflate header and menu items into the navigation drawer
+
+        return navDrawer;
+    }
+
+    /**
+     * Sets the {@link Toolbar}'s navigation button onClick listener.
+     *
+     * Opens the {@link NavigationView} drawer.
+     *
+     * @param toolbar
+     *          The activity's toolbar containing the navigation button.
+     *
+     * @param drawerLayout
+     *          The reference to the activity's main layout.
+     *
+     * @param navDrawer
+     *          The {@link NavigationView} we are open on button click.
+     */
+    private void setNavigationButtonListener(Toolbar toolbar, final DrawerLayout drawerLayout,
+                                             final View navDrawer) {
+        // Set the toolbar's nav button on click listener
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // On nav button click, open the nav drawer
+                drawerLayout.openDrawer(navDrawer);
+            }
+        });
     }
 }

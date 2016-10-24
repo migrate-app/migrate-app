@@ -30,7 +30,7 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
     private GoogleApiClient googleApiClient;
     private Context context;
 
-    protected LocationFinder(Context context) {
+    public LocationFinder(Context context) {
         this.context = context;
 
         // Instantiate GoogleAPIClient with given context
@@ -60,39 +60,6 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
     }
 
     /**
-     * Disconnects the {@link LocationFinder}'s
-     * {@link GoogleApiClient}.
-     */
-    public void disconnect() {
-        googleApiClient.disconnect();
-    }
-
-    /**
-     * Starts a request for location updates from the {@link GoogleApiClient}.
-     */
-    private void startLocationUpdates() {
-        try {
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    googleApiClient, LocationRequest.create(), this);
-        } catch (SecurityException e) {
-            // SecurityException thrown if location permissions are disabled
-            Log.d(LOG_TAG, "Location permissions deactivated when attempting to recover location.");
-
-            // Toast small message to user
-            Toast.makeText(context, "Location services turned off.", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    /**
-     * Stops the {@link GoogleApiClient}'s listening for location updates.
-     */
-    public void stopLocationUpdates() {
-        // Stop location updates from occurring
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                googleApiClient, this);
-    }
-
-    /**
      * Connection suspension callback for {@link GoogleApiClient}.
      *
      * @param cause
@@ -116,5 +83,38 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
         // Error handling can be implemented here
         // For now, log the connection failure at debug level
         Log.d(LOG_TAG, "GoogleApiClient connection failed.");
+    }
+
+    /**
+     * Disconnects the {@link LocationFinder}'s
+     * {@link GoogleApiClient}.
+     */
+    public void disconnect() {
+        googleApiClient.disconnect();
+    }
+
+    /**
+     * Stops the {@link GoogleApiClient}'s listening for location updates.
+     */
+    public void stopLocationUpdates() {
+        // Stop location updates from occurring
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                googleApiClient, this);
+    }
+
+    /**
+     * Starts a request for location updates from the {@link GoogleApiClient}.
+     */
+    private void startLocationUpdates() {
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    googleApiClient, LocationRequest.create(), this);
+        } catch (SecurityException e) {
+            // SecurityException thrown if location permissions are disabled
+            Log.d(LOG_TAG, "Location permissions deactivated when attempting to recover location.");
+
+            // Toast small message to user
+            Toast.makeText(context, "Location services turned off.", Toast.LENGTH_LONG).show();
+        }
     }
 }
