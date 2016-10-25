@@ -20,14 +20,12 @@ import java.util.Set;
 /**
  * Created by srowhani on 10/6/16.
  */
-
 public abstract class BaseMapActivity extends AppCompatActivity implements OnMapReadyCallback{
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
 
     public BaseMapActivity () {
-        mapFragment = new SupportMapFragment();
-        mapFragment.getMapAsync(this);
+        mapFragment = SupportMapFragment.newInstance();
     }
 
     public GoogleMap getMap () {
