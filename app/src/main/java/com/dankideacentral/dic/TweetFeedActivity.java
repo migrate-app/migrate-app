@@ -8,13 +8,16 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
@@ -31,6 +34,9 @@ import com.google.maps.android.clustering.ClusterManager;
 import java.util.Arrays;
 
 import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.User;
 
 public class TweetFeedActivity extends BaseMapActivity
         implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
@@ -46,25 +52,27 @@ public class TweetFeedActivity extends BaseMapActivity
     private TweetListFragment listFragment;
     private Fragmenter fm;
     private LocationFinder locationFinder;
+    private Twitter twitter;
 
     private Button toggleButton;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
+        twitter = TwitterUtil.getInstance().getTwitter();
 
-        // Set the navigation icon of the tool bar
+        // Set the navigation icon of the tool bar & its onClick listener
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
+        View navDrawer = setUpNavigationDrawer();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
-
-        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer
+        setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
 
         listFragment = new TweetListFragment();
 
-        fm.create(R.id.activity_tweet_feed, getFragment(), CURRENT_FRAGMENT);
+        fm.create(R.id.layout_tweet_feed, getFragment(), CURRENT_FRAGMENT);
         getFragment().getMapAsync(this);
 
         toggleButton = (Button) findViewById(R.id.toggle);
@@ -75,7 +83,7 @@ public class TweetFeedActivity extends BaseMapActivity
                         instanceof TweetListFragment
                             ? getFragment()
                             : listFragment;
-                fm.create(R.id.activity_tweet_feed, current, CURRENT_FRAGMENT);
+                fm.create(R.id.layout_tweet_feed, current, CURRENT_FRAGMENT);
             }
         });
     }
@@ -121,49 +129,6 @@ public class TweetFeedActivity extends BaseMapActivity
         } catch (SecurityException e) {
             Toast.makeText(this, "Location services turned off.", Toast.LENGTH_LONG).show();
         }
-    }
-
-    @Override
-    public void onListFragmentInteraction(TweetNode item) {
-        Snackbar.make(findViewById(R.id.activity_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
-    }
-
-    @Override
-    public boolean onClusterClick(Cluster cluster) {
-        Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
-        return true;
-    }
-    @Override
-    public boolean onClusterItemClick(ClusterItem clusterItem) {
-        Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
-        return false;
-    }
-
-    @Override
-    public void onLocationChanged(Location loc) {
-        LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
-
-        Log.d("LOCATION_LISTENER", currentLocation.toString());
-
-        getMap().moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-    @Override
-    public void onProviderEnabled(String provider) {}
-
-    @Override
-    public void onProviderDisabled(String provider) {}
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Unbind from the service
-
-        Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
-        stopService(stopServiceIntent);
     }
 
     /**
@@ -213,5 +178,110 @@ public class TweetFeedActivity extends BaseMapActivity
         startIntent.putExtra(getString(R.string.intent_lat), lat);
         startIntent.putExtra(getString(R.string.intent_long), log);
         startService(startIntent);
+    }
+
+    @Override
+    public void onListFragmentInteraction(TweetNode item) {
+        Snackbar.make(findViewById(R.id.layout_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onClusterClick(Cluster cluster) {
+        Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
+        return true;
+    }
+    @Override
+    public boolean onClusterItemClick(ClusterItem clusterItem) {
+        Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
+        return false;
+    }
+
+    @Override
+    public void onLocationChanged(Location loc) {
+        LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+
+        Log.d("LOCATION_LISTENER", currentLocation.toString());
+
+        getMap().moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+    @Override
+    public void onProviderEnabled(String provider) {}
+
+    @Override
+    public void onProviderDisabled(String provider) {}
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+
+        Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
+        stopService(stopServiceIntent);
+    }
+
+    /**
+     * Sets up the activity's {@link NavigationView}.
+     *
+     * Inflates its header and menu items.
+     *
+     * @return
+     *          An initialized {@link NavigationView} object.
+     */
+    private NavigationView setUpNavigationDrawer() {
+        NavigationView navDrawer = (NavigationView) findViewById(R.id.nav_drawer);
+
+        try {
+            String screenName = twitter.getScreenName(); // TODO: Put this in an async task
+            User user = twitter.showUser(screenName);
+
+            // Inflate and populate header
+            View navHeader = navDrawer.inflateHeaderView(R.layout.header_nav_drawer);
+
+            // Set twitter screenName
+            TextView screenNameText = (TextView) navHeader.findViewById(R.id.twitter_screen_name);
+            screenNameText.setText(screenName);
+
+            // Set twitter handle
+            TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
+            twitterHandleText.setText(user.getName());
+
+            // TODO: Inflate menu items into the navigation drawer
+
+        } catch (TwitterException | IllegalStateException e) {
+            // On request error to twitter, toast user
+            Toast.makeText(this, "Unable to contact Twitter.", Toast.LENGTH_LONG).show();
+        }
+
+        return navDrawer;
+    }
+
+    /**
+     * Sets the {@link Toolbar}'s navigation button onClick listener.
+     *
+     * Opens the {@link NavigationView} drawer.
+     *
+     * @param toolbar
+     *          The activity's toolbar containing the navigation button.
+     *
+     * @param drawerLayout
+     *          The reference to the activity's main layout.
+     *
+     * @param navDrawer
+     *          The {@link NavigationView} we are open on button click.
+     */
+    private void setNavigationButtonListener(Toolbar toolbar, final DrawerLayout drawerLayout,
+                                             final View navDrawer) {
+        // Set the toolbar's nav button on click listener
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // On nav button click, open the nav drawer
+                drawerLayout.openDrawer(navDrawer);
+            }
+        });
     }
 }
