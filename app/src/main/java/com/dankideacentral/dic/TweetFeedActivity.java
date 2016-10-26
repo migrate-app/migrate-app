@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
@@ -33,6 +34,9 @@ import com.google.maps.android.clustering.ClusterManager;
 import java.util.Arrays;
 
 import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.User;
 
 public class TweetFeedActivity extends BaseMapActivity
         implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
@@ -48,6 +52,7 @@ public class TweetFeedActivity extends BaseMapActivity
     private TweetListFragment listFragment;
     private Fragmenter fm;
     private LocationFinder locationFinder;
+    private Twitter twitter;
 
     private Button toggleButton;
 
@@ -56,6 +61,7 @@ public class TweetFeedActivity extends BaseMapActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
+        twitter = TwitterUtil.getInstance().getTwitter();
 
         // Set the navigation icon of the tool bar & its onClick listener
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
@@ -228,7 +234,27 @@ public class TweetFeedActivity extends BaseMapActivity
     private NavigationView setUpNavigationDrawer() {
         NavigationView navDrawer = (NavigationView) findViewById(R.id.nav_drawer);
 
-        // TODO: Inflate header and menu items into the navigation drawer
+        try {
+            String screenName = twitter.getScreenName(); // TODO: Put this in an async task
+            User user = twitter.showUser(screenName);
+
+            // Inflate and populate header
+            View navHeader = navDrawer.inflateHeaderView(R.layout.header_nav_drawer);
+
+            // Set twitter screenName
+            TextView screenNameText = (TextView) navHeader.findViewById(R.id.twitter_screen_name);
+            screenNameText.setText(screenName);
+
+            // Set twitter handle
+            TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
+            twitterHandleText.setText(user.getName());
+
+            // TODO: Inflate menu items into the navigation drawer
+
+        } catch (TwitterException | IllegalStateException e) {
+            // On request error to twitter, toast user
+            Toast.makeText(this, "Unable to contact Twitter.", Toast.LENGTH_LONG).show();
+        }
 
         return navDrawer;
     }
