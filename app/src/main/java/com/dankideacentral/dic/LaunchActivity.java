@@ -16,6 +16,7 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        TwitterUtil.init(getApplicationContext()); // initialize the Twitter Singleton
         String twitterAuth = preferences.getString(getString(R.string.twitter_auth_preference), null);
         String twitterAuthSecret = preferences.getString(getString(R.string.twitter_auth_secret_preference), null);
         PackageManager pm = this.getPackageManager();
@@ -27,9 +28,6 @@ public class LaunchActivity extends AppCompatActivity {
             Intent loginIntent = new Intent(this, LoginActivity.class);
             startActivity(loginIntent);
         } else {
-            // Initialize the TwitterUtil singleton only if auth tokens exist
-            TwitterUtil.init(getApplicationContext());
-
             if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
                 Intent mapIntent = new Intent(this, TweetFeedActivity.class);
                 startActivity(mapIntent);

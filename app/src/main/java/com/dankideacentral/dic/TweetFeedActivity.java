@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -234,27 +235,15 @@ public class TweetFeedActivity extends BaseMapActivity
     private NavigationView setUpNavigationDrawer() {
         NavigationView navDrawer = (NavigationView) findViewById(R.id.nav_drawer);
 
-        try {
-            String screenName = twitter.getScreenName(); // TODO: Put this in an async task
-            User user = twitter.showUser(screenName);
+        // Inflate header & find its views
+        View navHeader = navDrawer.inflateHeaderView(R.layout.header_nav_drawer);
+        TextView twitterNameText = (TextView) navHeader.findViewById(R.id.twitter_name);
+        TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
 
-            // Inflate and populate header
-            View navHeader = navDrawer.inflateHeaderView(R.layout.header_nav_drawer);
+        // Spawn async task to query twitter for user info and populate nav drawer header
+        new GetTwitterUserInfoTask().execute(twitterNameText, twitterHandleText);
 
-            // Set twitter screenName
-            TextView screenNameText = (TextView) navHeader.findViewById(R.id.twitter_screen_name);
-            screenNameText.setText(screenName);
-
-            // Set twitter handle
-            TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
-            twitterHandleText.setText(user.getName());
-
-            // TODO: Inflate menu items into the navigation drawer
-
-        } catch (TwitterException | IllegalStateException e) {
-            // On request error to twitter, toast user
-            Toast.makeText(this, "Unable to contact Twitter.", Toast.LENGTH_LONG).show();
-        }
+        // TODO: Inflate menu items into the navigation drawer
 
         return navDrawer;
     }
@@ -283,5 +272,43 @@ public class TweetFeedActivity extends BaseMapActivity
                 drawerLayout.openDrawer(navDrawer);
             }
         });
+    }
+
+    private class GetTwitterUserInfoTask extends AsyncTask<View, Long, User> {
+
+        private TextView twitterNameText;
+        private TextView twitterHandleText;
+
+        @Override
+        protected User doInBackground(View... params) {
+            User user = null;
+
+            try {
+                // Expect TextViews to be the first two params passed in
+                twitterNameText = (TextView) params[0];
+                twitterHandleText = (TextView) params[1];
+
+                // Query twitter for twitter handle (screenName) and user data
+                String screenName = twitter.getScreenName();
+                user = twitter.showUser(screenName);
+
+            } catch (TwitterException | IllegalStateException e) {
+                // On request error to twitter, toast user
+                Toast.makeText(TweetFeedActivity.this.getBaseContext(), "Unable to contact Twitter.",
+                        Toast.LENGTH_LONG).show();
+            }
+
+            return user;
+        }
+
+        @Override
+        protected void onPostExecute(User user) {
+            // If no user was found then do nothing
+            if (user == null) return;
+
+            // This is executed in UI thread, so set nav drawer header values to user data
+            twitterNameText.setText(user.getName());
+            twitterHandleText.setText(user.getScreenName());
+        }
     }
 }
