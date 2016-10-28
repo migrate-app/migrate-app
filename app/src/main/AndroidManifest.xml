@@ -47,13 +47,9 @@
         <activity
             android:name=".LaunchActivity"
             android:noHistory="true">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
 
-        <!-- Authentication activities -->
+
+        </activity>
         <activity android:name=".authentication.LoginActivity" />
         <activity android:name=".authentication.OAuthActivity" />
 
@@ -67,6 +63,7 @@
             android:label="@string/title_activity_settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
