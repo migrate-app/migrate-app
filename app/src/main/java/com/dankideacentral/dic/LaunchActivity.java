@@ -16,13 +16,20 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        TwitterUtil.init(getApplicationContext()); // initialize the Twitter Singleton
+
+        // Set preferences to default values when the app is opened for the first time
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        // initialize the Twitter Singleton
+        TwitterUtil.init(getApplicationContext());
         String twitterAuth = preferences.getString(getString(R.string.twitter_auth_preference), null);
         String twitterAuthSecret = preferences.getString(getString(R.string.twitter_auth_secret_preference), null);
+
         PackageManager pm = this.getPackageManager();
         int hasFineLocationPermission = pm.checkPermission(
                 FINE_LOCATION_PERMISSION,
                 this.getPackageName());
+
         // auth tokens don't expire. Just check if it exists
         if (twitterAuth == null || twitterAuthSecret == null) {
             Intent loginIntent = new Intent(this, LoginActivity.class);
