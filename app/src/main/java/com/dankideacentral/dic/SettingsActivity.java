@@ -121,12 +121,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         super.onCreate(savedInstanceState);
         // setupActionBar();
 
-        // Display all the settings on this activity as long as the device is not a tablet.
-        if(this.onIsMultiPane()) {
-            getFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new MySettingsFragment())
-                    .commit();
-        }
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new MySettingsFragment())
+                .commit();
     }
 
     /**
@@ -154,11 +152,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
-        // Show settings using headers if this device is a tablet
-        // instead of showing all settings on one activity.
-        if(!this.onIsMultiPane()) {
-            loadHeadersFromResource(R.xml.pref_headers, target);
-        }
+        loadHeadersFromResource(R.xml.pref_headers, target);
     }
 
     /**
@@ -167,7 +161,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || MySettingsFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || DataSyncPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);

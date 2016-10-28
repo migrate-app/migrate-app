@@ -17,22 +17,19 @@
     <PreferenceCategory
         android:title="Notifications"
         android:key="pref_key_notification_settings">
-        <SwitchPreference
+        <CheckBoxPreference
             android:key="pref_key_push_notifications"
             android:title="Enable push notifications"
             android:summary="Be notified when your friends tweet near you"
             android:defaultValue="true" />
         <CheckBoxPreference
-            android:dependency="pref_key_push_notifications"
             android:key="pref_key_vibrate_on_notification"
             android:title="Vibrate"
             android:summary=""
             android:defaultValue="true" />
         <RingtonePreference
-            android:dependency="pref_key_push_notifications"
             android:key="pref_key_notification_ringtone"
             android:title="Ringtone"
-            android:defaultValue="content://settings/system/notification_sound"
-            android:ringtoneType="notification" />
+            android:defaultValue="" />
     </PreferenceCategory>
 </PreferenceScreen>
