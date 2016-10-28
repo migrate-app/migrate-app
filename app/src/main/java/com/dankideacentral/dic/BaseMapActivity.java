@@ -34,8 +34,7 @@ public abstract class BaseMapActivity extends AppCompatActivity implements
     private WeightedNodeRenderer <TweetNode> mNodeRenderer;
 
     public BaseMapActivity () {
-        mapFragment = new SupportMapFragment();
-        mapFragment.getMapAsync(this);
+        mapFragment = SupportMapFragment.newInstance();
     }
 
     public GoogleMap getMap () {

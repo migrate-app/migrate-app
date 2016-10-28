@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,10 +14,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
@@ -33,20 +30,20 @@ import com.google.android.gms.maps.model.LatLng;
  * @version 1.2
  * @since 2016-10-2
  */
-public class SearchActivity extends AppCompatActivity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class SearchActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "SEARCH_ACTIVITY";
     private static final String FINE_LOCATION_PERMISSION = "android.permission.ACCESS_FINE_LOCATION";
-    private static final int REQUEST_PERMISSION_FINE_LOCATION = 1;
+    private static final String COARSE_LOCATION_PERMISSION = "android.permissions.ACCESS_COARSE_LOCATION";
+    private static final int REQUEST_PERMISSION_LOCATIONS = 1;
 
     private ImageButton locationButton;
     private Button searchButton;
     private PlaceAutocompleteFragment autocompleteFragment;
     private PackageManager packageManager;
     private AlertDialog.Builder alertBuilder;
-    private GoogleApiClient googleApiClient;
     private LatLng currentLatLng;
+    private LocationFinder locationFinder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +54,6 @@ public class SearchActivity extends AppCompatActivity
 
         // Instantiate alertBuilder
         alertBuilder = new AlertDialog.Builder(this);
-
-        // Instantiate GoogleAPIClient
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
 
         setContentView(R.layout.activity_search);
 
@@ -102,74 +92,15 @@ public class SearchActivity extends AppCompatActivity
                                            @NonNull int[] grantResults) {
 
         // Case requestCode is the location permission request
-        if (requestCode == REQUEST_PERMISSION_FINE_LOCATION) {
+        if (requestCode == REQUEST_PERMISSION_LOCATIONS) {
 
             // Case grantResults not empty (occurs on permission request cancellation)
             // and permission granted by user
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Acquire location from the device
-                Location location = getCurrentLocation();
-
-                // Handle device location response
-                handleLocationSend(location);
+                // Uses the LocationFinder to grab the current location of the device
+                getCurrentLocation();
             }
         }
-    }
-
-    /**
-     * Connection callback for {@link GoogleApiClient}.
-     *
-     * @param bundle
-     *          Data provided to {@link GoogleApiClient} by Google Play services.
-     */
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        // On successful connection, log at info level
-        Log.i(LOG_TAG, "GoogleApiClient successfully connected.");
-    }
-
-    /**
-     * Connection suspension callback for {@link GoogleApiClient}.
-     *
-     * @param cause
-     *          The suspension causation code given to the callback method.
-     */
-    @Override
-    public void onConnectionSuspended(int cause) {
-        // On connection suspension, log at info level
-        Log.i(LOG_TAG, "GoogleApiClient suspended with code: " + cause + ".");
-    }
-
-    /**
-     * Connection error callback for {@link GoogleApiClient}.
-     *
-     * @param result
-     *          A {@link ConnectionResult} object used to
-     *          determine what type of error occurred.
-     */
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult result) {
-        // Error handling can be implemented here
-        // For now, log the connection failure at debug level
-        Log.d(LOG_TAG, "GoogleApiClient connection failed.");
-    }
-
-    /**
-     * On activity startup, connects to the {@link GoogleApiClient}.
-     */
-    @Override
-    protected void onStart() {
-        googleApiClient.connect();
-        super.onStart();
-    }
-
-    /**
-     * On activity stop, disconnects from the {@link GoogleApiClient}.
-     */
-    @Override
-    protected void onStop() {
-        googleApiClient.disconnect();
-        super.onStop();
     }
 
     /**
@@ -209,40 +140,38 @@ public class SearchActivity extends AppCompatActivity
         if (isLocationEnabled == PackageManager.PERMISSION_DENIED) {
 
             // Send location permission request to the user
-            // Passes REQUEST_PERMISSION_FINE_LOCATION for callback identification
+            // Passes REQUEST_PERMISSION_LOCATIONS for callback identification
             ActivityCompat.requestPermissions(this,
-                    new String[]{FINE_LOCATION_PERMISSION},
-                    REQUEST_PERMISSION_FINE_LOCATION);
+                    new String[]{FINE_LOCATION_PERMISSION, COARSE_LOCATION_PERMISSION},
+                    REQUEST_PERMISSION_LOCATIONS);
         } else {
-            // Case permission is enabled - obtain device's location
-            Location location = getCurrentLocation();
-
-            handleLocationSend(location);
+            // Uses the LocationFinder to get the current location of the device
+            getCurrentLocation();
         }
     }
 
     /**
-     * Attempts to use the {@link GoogleApiClient} to obtain
-     * the device's current location.
+     * Creates a new instance of a {@link LocationFinder} object,
+     * implementing its onLocationChanged() method to guarantee
+     * reception of current known location.
      *
-     * @return
-     *          An instantiated {@link Location} object,
-     *          or null if obtaining the location failed.
+     * Once location is received, passes focus to the {@link TweetFeedActivity}.
      */
-    private Location getCurrentLocation() {
-        Location location = null;
+    private void getCurrentLocation() {
+        // Acquire location from the device by initializing a locationFinder object
+        locationFinder = new LocationFinder(this) {
+            @Override
+            public void onLocationChanged(Location location) {
+                // Prevent further location updates from occurring
+                locationFinder.stopLocationUpdates();
 
-        // Attempt to get last known location from the device
-        try {
-            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        } catch (SecurityException e) {
-            // SecurityException thrown if location permissions are disabled
-            // Log issue and warn user via a dialog box
-            Log.d(LOG_TAG, "Location permissions deactivated when attempting to recover location.");
-        }
+                // Disconnect from the googleApiClient
+                locationFinder.disconnect();
 
-        // Note: Could be null if locationManager could not determine the device's location
-        return location;
+                // Handle device location response - send to
+                handleLocationSend(location);
+            }
+        };
     }
 
     /**
