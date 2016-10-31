@@ -9,14 +9,26 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.util.Date;
+
+import twitter4j.ExtendedMediaEntity;
 import twitter4j.FilterQuery;
 import twitter4j.GeoLocation;
+import twitter4j.HashtagEntity;
+import twitter4j.MediaEntity;
+import twitter4j.Place;
+import twitter4j.RateLimitStatus;
+import twitter4j.Scopes;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import twitter4j.SymbolEntity;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
+import twitter4j.URLEntity;
+import twitter4j.User;
+import twitter4j.UserMentionEntity;
 import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 
@@ -54,6 +66,8 @@ public class TwitterStreamService extends Service {
         twitterStream.addListener(twitterStreamListener);
         // Begin filter stream
         twitterStream.filter(mFilter);
+        //twitterStream.firehose(100);
+
         return START_NOT_STICKY;
     }
 

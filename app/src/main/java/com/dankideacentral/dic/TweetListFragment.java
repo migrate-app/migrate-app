@@ -12,7 +12,10 @@ import android.view.ViewGroup;
 
 import com.dankideacentral.dic.model.TweetNode;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+
+import twitter4j.GeoLocation;
 
 /**
  * A fragment representing a list of Items.
@@ -28,12 +31,16 @@ public class TweetListFragment extends Fragment {
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private MyItemRecyclerViewAdapter recyclerViewAdapter;
-
+    private ArrayList tweetNodes = new ArrayList();
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public TweetListFragment() {}
+
+    public TweetListFragment(ArrayList tweetNodes) {
+        this.tweetNodes = tweetNodes;
+    }
 
     public boolean insert (TweetNode item) {
         return recyclerViewAdapter.insert(item);
@@ -61,7 +68,7 @@ public class TweetListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.tweet_list_item, container, false);
+        View view = inflater.inflate(R.layout.tweet_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -72,7 +79,8 @@ public class TweetListFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(recyclerViewAdapter = new MyItemRecyclerViewAdapter(new ArrayList<TweetNode>(), mListener));
+
+            recyclerView.setAdapter(recyclerViewAdapter = new MyItemRecyclerViewAdapter(tweetNodes, mListener));
         }
         return view;
     }

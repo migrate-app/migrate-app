@@ -10,6 +10,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+
+import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+
+
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -28,6 +34,7 @@ import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import twitter4j.Status;
@@ -94,18 +101,6 @@ public class TweetFeedActivity extends BaseMapActivity
             getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
         }
 
-        // set up broadcast receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Status tweet = (Status) intent.getExtras().get("tweet");
-                TweetNode tweetNode = new TweetNode(tweet);
-                Log.v("Received Tweet: ", tweet.toString());
-                clusterManager.addItem(tweetNode);
-                clusterManager.cluster();
-            }
-        }, new IntentFilter(getString(R.string.tweet_broadcast)));
-
         clusterManager = cm;
 
         map.setOnCameraChangeListener(cm);
@@ -121,7 +116,38 @@ public class TweetFeedActivity extends BaseMapActivity
         } catch (SecurityException e) {
             Toast.makeText(this, "Location services turned off.", Toast.LENGTH_LONG).show();
         }
+
+
     }
+
+
+    protected void onStart() {
+        super.onStart();
+        // Start and bind TwitterStreamService
+        // lat and long of ottawa
+        double lat = 40.748817;
+        double log = -73.985428;
+        Intent startIntent = new Intent(this, TwitterStreamService.class);
+        // put the radius and location on the intent
+        startIntent.putExtra(getString(R.string.intent_lat), lat);
+        startIntent.putExtra(getString(R.string.intent_long), log);
+        startService(startIntent);
+
+
+        // set up broadcast receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Status tweet = (Status) intent.getExtras().get("tweet");
+                TweetNode tweetNode = new TweetNode(tweet);
+                Log.v("Received Tweet: ", tweet.toString());
+                clusterManager.addItem(tweetNode);
+                clusterManager.cluster();
+            }
+        }, new IntentFilter(getString(R.string.tweet_broadcast)));
+
+    }
+
 
     /**
      * Creates a new instance of a {@link LocationFinder} object,
@@ -180,6 +206,16 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public boolean onClusterClick(Cluster cluster) {
         Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
+        TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+        Bundle args = new Bundle();
+        //args.putParcelableArray("TWEET_LIST", cluster.getItems().toArray());
+        newFragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.activity_tweet_feed, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+
         return true;
     }
     @Override
