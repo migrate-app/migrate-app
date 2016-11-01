@@ -3,6 +3,7 @@ package com.dankideacentral.dic;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -65,8 +66,37 @@ public class TwitterStreamService extends Service {
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance(accessToken);
         twitterStream.addListener(twitterStreamListener);
         // Begin filter stream
-        twitterStream.filter(mFilter);
+        //twitterStream.filter(mFilter);
         //twitterStream.firehose(100);
+        int p = 0;
+
+        new AsyncTask<Void, Void, Void>() {
+            protected void onPreExecute() {
+                // Pre Code
+            }
+            protected Void doInBackground(Void... unused) {
+                // Background Code
+                int p = 0;
+                while (p < 20) {
+                    TestTweet status = new TestTweet("@amax", "test", new GeoLocation(37.4219983, -122.084));
+                    Intent statusIntent = new Intent(getApplicationContext(), TweetFeedActivity.class);
+                    statusIntent.setAction(getString(R.string.tweet_broadcast));
+                    statusIntent.putExtra("tweet", status);
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(statusIntent);
+                    p++;
+                }
+
+                return null;
+            }
+            protected void onPostExecute(Void unused) {
+
+            }
+        }.execute();
+
+
+
+
+
 
         return START_NOT_STICKY;
     }

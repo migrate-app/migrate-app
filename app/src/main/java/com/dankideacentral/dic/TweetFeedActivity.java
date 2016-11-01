@@ -54,6 +54,7 @@ public class TweetFeedActivity extends BaseMapActivity
     private Fragmenter fm;
     private LocationFinder locationFinder;
 
+    private ArrayList<TweetNode> tweets = new ArrayList<>();
     private Button toggleButton;
 
     @Override
@@ -78,11 +79,16 @@ public class TweetFeedActivity extends BaseMapActivity
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment current = fm.find(CURRENT_FRAGMENT)
-                        instanceof TweetListFragment
-                            ? getFragment()
-                            : listFragment;
-                fm.create(R.id.activity_tweet_feed, current, CURRENT_FRAGMENT);
+                // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+                TweetListFragment newFragment = new TweetListFragment(tweets);
+                Bundle args = new Bundle();
+                //args.putParcelableArray("TWEET_LIST", cluster.getItems().toArray());
+                newFragment.setArguments(args);
+
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.activity_tweet_feed, newFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
     }
@@ -101,6 +107,19 @@ public class TweetFeedActivity extends BaseMapActivity
             getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
         }
 
+        // set up broadcast receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Status tweet = (Status) intent.getExtras().get("tweet");
+                TweetNode tweetNode = new TweetNode(tweet);
+                Log.v("Received Tweet: ", tweet.toString());
+                tweets.add(tweetNode);
+                clusterManager.addItem(tweetNode);
+                clusterManager.cluster();
+            }
+        }, new IntentFilter(getString(R.string.tweet_broadcast)));
+
         clusterManager = cm;
 
         map.setOnCameraChangeListener(cm);
@@ -116,36 +135,6 @@ public class TweetFeedActivity extends BaseMapActivity
         } catch (SecurityException e) {
             Toast.makeText(this, "Location services turned off.", Toast.LENGTH_LONG).show();
         }
-
-
-    }
-
-
-    protected void onStart() {
-        super.onStart();
-        // Start and bind TwitterStreamService
-        // lat and long of ottawa
-        double lat = 40.748817;
-        double log = -73.985428;
-        Intent startIntent = new Intent(this, TwitterStreamService.class);
-        // put the radius and location on the intent
-        startIntent.putExtra(getString(R.string.intent_lat), lat);
-        startIntent.putExtra(getString(R.string.intent_long), log);
-        startService(startIntent);
-
-
-        // set up broadcast receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Status tweet = (Status) intent.getExtras().get("tweet");
-                TweetNode tweetNode = new TweetNode(tweet);
-                Log.v("Received Tweet: ", tweet.toString());
-                clusterManager.addItem(tweetNode);
-                clusterManager.cluster();
-            }
-        }, new IntentFilter(getString(R.string.tweet_broadcast)));
-
     }
 
 
@@ -206,7 +195,8 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public boolean onClusterClick(Cluster cluster) {
         Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
-        TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+       // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+        TweetListFragment newFragment = new TweetListFragment(tweets);
         Bundle args = new Bundle();
         //args.putParcelableArray("TWEET_LIST", cluster.getItems().toArray());
         newFragment.setArguments(args);
