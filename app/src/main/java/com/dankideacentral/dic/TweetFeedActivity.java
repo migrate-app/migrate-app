@@ -33,7 +33,7 @@ import java.util.Arrays;
 import twitter4j.Status;
 
 public class TweetFeedActivity extends BaseMapActivity
-        implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
+        implements OnListFragmentInteractionListener, LocationListener {
 
     private static final int MAP_ZOOM_DISTANCE = 12;
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
@@ -107,10 +107,6 @@ public class TweetFeedActivity extends BaseMapActivity
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
 
         clusterManager = cm;
-
-        map.setOnCameraChangeListener(cm);
-        clusterManager.setOnClusterClickListener(this);
-        clusterManager.setOnClusterItemClickListener(this);
 
         try {
             lm.requestLocationUpdates(

@@ -53,7 +53,8 @@ public class TwitterStreamService extends Service {
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance(accessToken);
         twitterStream.addListener(twitterStreamListener);
         // Begin filter stream
-        twitterStream.filter(mFilter);
+        // twitterStream.filter(mFilter);
+        twitterStream.sample();
         return START_NOT_STICKY;
     }
 
@@ -74,7 +75,6 @@ public class TwitterStreamService extends Service {
 
         @Override
         public void onStatus(Status status) {
-            Log.d(TAG.concat("- Tweet"), status.toString());
             GeoLocation tweetLocation = status.getGeoLocation();
 
             if (tweetLocation != null) {
