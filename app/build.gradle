@@ -48,6 +48,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.2.0'
     compile 'com.google.maps.android:android-maps-utils:0.4'
     compile 'com.android.support:support-v4:24.2.0'
-    compile project(":seekbar")
+    compile 'com.pavelsikun:material-seekbar-preference:2.3.0+'
     testCompile 'junit:junit:4.12'
 }

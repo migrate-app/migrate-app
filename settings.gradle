@@ -1,2 +1,1 @@
-include ':app', ':seekbar'
-project(':seekbar').projectDir = new File('libs/seekbar')
+include ':app'
