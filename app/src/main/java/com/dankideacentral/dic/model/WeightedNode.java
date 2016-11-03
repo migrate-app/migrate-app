@@ -1,5 +1,7 @@
 package com.dankideacentral.dic.model;
 
+import android.os.Parcelable;
+
 import com.google.maps.android.clustering.ClusterItem;
 
 /**
@@ -8,5 +10,6 @@ import com.google.maps.android.clustering.ClusterItem;
 
 public abstract class WeightedNode implements ClusterItem {
     public abstract int getWeight();
+
 }
 

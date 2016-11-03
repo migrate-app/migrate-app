@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
@@ -35,14 +36,15 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.tweet_list, parent, false);
+                .inflate(R.layout.tweet_list_item, parent, false);
         return new ViewHolder(view);
     }
+
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).getStatus().getUser().toString());
+        holder.mIdView.setText(mValues.get(position).getStatus().getUser().getName());
         holder.mContentView.setText(mValues.get(position).getStatus().getText());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +58,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             }
         });
     }
+
 
     @Override
     public int getItemCount() {
@@ -71,8 +74,9 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+
+            mIdView = (TextView) view.findViewById(R.id.tweet_header).findViewById(R.id.tweet_handle);
+            mContentView = (TextView) view.findViewById(R.id.tweet_view_content);
         }
 
         @Override

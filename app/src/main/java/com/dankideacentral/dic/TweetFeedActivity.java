@@ -10,9 +10,17 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+
+
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -28,6 +36,7 @@ import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import twitter4j.Status;
@@ -47,6 +56,7 @@ public class TweetFeedActivity extends BaseMapActivity
     private Fragmenter fm;
     private LocationFinder locationFinder;
 
+    private ArrayList<TweetNode> tweets = new ArrayList<>();
     private Button toggleButton;
 
     @Override
@@ -58,9 +68,12 @@ public class TweetFeedActivity extends BaseMapActivity
 
         // Set the navigation icon of the tool bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_nav_button);
+        //toolbar.setNavigationIcon(R.drawable.ic_nav_button);
+        //setSupportActionBar(toolbar);
+        //getActionBar().setDisplayShowTitleEnabled(false);
 
-        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer
+
+        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer. Use [onOptionItemIsSelected]
 
         listFragment = new TweetListFragment();
 
@@ -71,11 +84,16 @@ public class TweetFeedActivity extends BaseMapActivity
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment current = fm.find(CURRENT_FRAGMENT)
-                        instanceof TweetListFragment
-                            ? getFragment()
-                            : listFragment;
-                fm.create(R.id.activity_tweet_feed, current, CURRENT_FRAGMENT);
+                // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+                TweetListFragment newFragment = new TweetListFragment(tweets);
+                Bundle args = new Bundle();
+                //args.putParcelableArray("TWEET_LIST", cluster.getItems().toArray());
+                newFragment.setArguments(args);
+
+                getSupportFragmentManager().beginTransaction()
+                .add(R.id.activity_tweet_feed, newFragment)
+                .addToBackStack(null)
+                .commit();
             }
         });
     }
@@ -103,6 +121,7 @@ public class TweetFeedActivity extends BaseMapActivity
                 Status tweet = (Status) intent.getExtras().get("tweet");
                 TweetNode tweetNode = new TweetNode(tweet);
                 Log.v("Received Tweet: ", tweet.toString());
+                tweets.add(tweetNode);
                 clusterManager.addItem(tweetNode);
                 clusterManager.cluster();
             }
@@ -121,11 +140,12 @@ public class TweetFeedActivity extends BaseMapActivity
         }
     }
 
+
     /**
      * Creates a new instance of a {@link LocationFinder} object,
      * implementing its onLocationChanged() method to guarantee
      * reception of current known location.
-     *
+     * <p>
      * Once location is received, zooms the map fragment in to
      * the received location.
      */
@@ -152,8 +172,7 @@ public class TweetFeedActivity extends BaseMapActivity
      * Starts the twitter stream service to receive
      * tweets at the specified latitude & longitude locations.
      *
-     * @param latLng
-     *          The {@link LatLng} location to open the service at.
+     * @param latLng The {@link LatLng} location to open the service at.
      */
     private void startTwitterStreamService(LatLng latLng) {
         latLng = latLng != null
@@ -177,8 +196,20 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public boolean onClusterClick(Cluster cluster) {
         Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
+        // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+        TweetListFragment newFragment = new TweetListFragment(tweets);
+        Bundle args = new Bundle();
+        //args.putParcelableArray("TWEET_LIST", cluster.getItems().toArray());
+        newFragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.activity_tweet_feed, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+
         return true;
     }
+
     @Override
     public boolean onClusterItemClick(ClusterItem clusterItem) {
         Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
@@ -196,13 +227,16 @@ public class TweetFeedActivity extends BaseMapActivity
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     @Override
-    public void onProviderEnabled(String provider) {}
+    public void onProviderEnabled(String provider) {
+    }
 
     @Override
-    public void onProviderDisabled(String provider) {}
+    public void onProviderDisabled(String provider) {
+    }
 
     @Override
     protected void onStop() {
@@ -212,4 +246,21 @@ public class TweetFeedActivity extends BaseMapActivity
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
     }
+
+    public boolean onOptionItemIsSelected(MenuItem item) {
+        // put code to handle actionbar items.. make sure you call super.onOptionItemSelected(item) as the default.
+
+        switch (item.getItemId()) {
+            case R.id.back_to_map:
+                Log.v("TweetListActivity --", "back");
+                getFragmentManager().popBackStack();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+
+    }
+
 }
