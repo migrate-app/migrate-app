@@ -67,8 +67,8 @@ public class TwitterStreamService extends Service {
         twitterStream.addListener(twitterStreamListener);
         // Begin filter stream
 
-        // twitterStream.filter(mFilter);
-        twitterStream.sample();
+         twitterStream.filter(mFilter);
+        //twitterStream.sample();
         return START_NOT_STICKY;
     }
 
