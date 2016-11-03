@@ -1,5 +1,8 @@
 package com.dankideacentral.dic.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
@@ -58,6 +61,6 @@ public class TweetNode extends WeightedNode {
             (status.getUser().isVerified() ? 1 : 0))
         );
 
-
     }
+
 }
