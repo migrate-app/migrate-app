@@ -1,13 +1,14 @@
 package com.dankideacentral.dic;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
-import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 public final class TwitterUtil {
@@ -19,11 +20,23 @@ public final class TwitterUtil {
     private static TwitterUtil instance = new TwitterUtil();
 
     public static void init(Context applicationContext) {
+        // Get twitter auth token & secret from shared preferences
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
+
+        String twitterAuthToken = preferences.getString(
+                applicationContext.getString(R.string.twitter_auth_preference), null);
+        String twitterAuthTokenSecret = preferences.getString(
+                applicationContext.getString(R.string.twitter_auth_secret_preference), null);
+
+        // Create twitter authentication configuration
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.setOAuthConsumerKey(applicationContext.getString(R.string.twitter_consumer_key));
-        configurationBuilder.setOAuthConsumerSecret(applicationContext.getString(R.string.twitter_consumer_secret));
-        Configuration configuration = configurationBuilder.build();
-        twitterFactory = new TwitterFactory(configuration);
+        configurationBuilder.setDebugEnabled(true)
+                .setOAuthConsumerKey(applicationContext.getString(R.string.twitter_consumer_key))
+                .setOAuthConsumerSecret(applicationContext.getString(R.string.twitter_consumer_secret))
+                .setOAuthAccessToken(twitterAuthToken)
+                .setOAuthAccessTokenSecret(twitterAuthTokenSecret);
+
+        twitterFactory = new TwitterFactory(configurationBuilder.build());
         twitter = twitterFactory.getInstance();
     }
 

@@ -77,6 +77,9 @@ public class LoginActivity extends AppCompatActivity {
             prefEditor.putString(getString(R.string.twitter_auth_secret_preference), requestToken.getTokenSecret());
             prefEditor.commit();
 
+            // Re-initialize the twitter singleton with the stored authentication tokens
+            TwitterUtil.init(getApplicationContext());
+
             // Use a WebView to provide an authentication interface to the user
             Intent intent = new Intent(getApplicationContext(), OAuthActivity.class);
             intent.putExtra(getString(R.string.string_extra_authentication_url), requestToken.getAuthenticationURL());
