@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
@@ -124,19 +123,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         // Display all the settings on this activity as long as the device is not a tablet.
         if(!this.onIsMultiPane()) {
             getFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new MySettingsFragment())
+                    .replace(android.R.id.content, new AllSettingsFragment())
                     .commit();
-        }
-    }
-
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
-    private void setupActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            // Show the Up button in the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -167,13 +155,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || MySettingsFragment.class.getName().equals(fragmentName)
+                || AllSettingsFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || DataSyncPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);
     }
 
-    public static class MySettingsFragment extends PreferenceFragment {
+    public static class AllSettingsFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);

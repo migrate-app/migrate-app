@@ -19,14 +19,13 @@
             android:summary=""
             android:defaultValue="true" />
         <com.pavelsikun.seekbarpreference.SeekBarPreference
-            android:dependency="pref_key_enable_geolocation"
             android:key="pref_key_search_radius"
             android:title="Search radius"
             android:summary=""
             android:enabled="true"
             android:defaultValue="10"
 
-            external:msbp_minValue="2"
+            external:msbp_minValue="1"
             external:msbp_maxValue="50"
             external:msbp_interval="1"
             external:msbp_measurementUnit="km"
