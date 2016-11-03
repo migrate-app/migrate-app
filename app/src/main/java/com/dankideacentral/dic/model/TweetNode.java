@@ -54,12 +54,11 @@ public class TweetNode extends WeightedNode {
     }
 
     @Override
-    public int getWeight() {
-        return ((int) Math.ceil(
-            Math.log(status.getFavoriteCount()) +
-            Math.log(status.getRetweetCount())  +
-            (status.getUser().isVerified() ? 1 : 0))
-        );
+    public int getSize() {
+        return    status.getHashtagEntities().length
+                + status.getUserMentionEntities().length
+                + (int) Math.log(status.getUser().getFollowersCount());
+
 
     }
 

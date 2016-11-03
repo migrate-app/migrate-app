@@ -41,6 +41,7 @@ public class TwitterStreamService extends Service {
     public String className = "TwitterStreamService";
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v(className, "Starting Twitter Stream");
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int radius = preferences.getInt(getString(R.string.preference_radius), 250); // radius in km
@@ -70,6 +71,12 @@ public class TwitterStreamService extends Service {
         // twitterStream.filter(mFilter);
         twitterStream.sample();
         return START_NOT_STICKY;
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.v(className, "Destroying Twitter Stream");
+        twitterStream.shutdown();
     }
 
     @Nullable

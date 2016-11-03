@@ -14,17 +14,21 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 
 import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.model.WeightedNode;
+import com.google.android.gms.common.api.Result;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -51,6 +55,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -68,14 +73,12 @@ import static com.google.maps.android.clustering.algo.NonHierarchicalDistanceBas
  * The default view for a ClusterManager. Markers are animated in and out of clusters.
  */
 public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRenderer<T> {
+    private static final String TAG = "WeightedNodeRenderer";
     private static final boolean SHOULD_ANIMATE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     private final GoogleMap mMap;
-    private final IconGenerator mIconGenerator;
     private final ClusterManager<T> mClusterManager;
     private final float mDensity;
 
-    private static final int[] BUCKETS = {10, 20, 50, 100, 200, 500, 1000};
-    private ShapeDrawable mColoredCircleBackground;
 
     /**
      * Markers that are currently on the map.
@@ -83,10 +86,6 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
     private Set<MarkerWithPosition> mMarkers = Collections.newSetFromMap(
             new ConcurrentHashMap<MarkerWithPosition, Boolean>());
 
-    /**
-     * Icons for each bucket.
-     */
-    private SparseArray<BitmapDescriptor> mIcons = new SparseArray<BitmapDescriptor>();
 
     /**
      * Markers for single ClusterItems.
@@ -96,7 +95,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
     /**
      * If cluster size is less than this size, display individual markers.
      */
-    private int mMinClusterSize = 4;
+    private int mMinClusterSize = 0;
 
     /**
      * The currently displayed set of clusters.
@@ -124,9 +123,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
     public WeightedNodeRenderer(Context context, GoogleMap map, ClusterManager<T> clusterManager) {
         mMap = map;
         mDensity = context.getResources().getDisplayMetrics().density;
-        mIconGenerator = new IconGenerator(context);
-        mIconGenerator.setContentView(makeSquareTextView(context));
-        mIconGenerator.setBackground(makeClusterBackground());
+
         mClusterManager = clusterManager;
     }
 
@@ -171,59 +168,6 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
         mClusterManager.getClusterMarkerCollection().setOnMarkerClickListener(null);
     }
 
-    private LayerDrawable makeClusterBackground() {
-        mColoredCircleBackground = new ShapeDrawable(new OvalShape());
-        ShapeDrawable outline = new ShapeDrawable(new OvalShape());
-        outline.getPaint().setColor(0x80ffffff); // Transparent white.
-        LayerDrawable background = new LayerDrawable(new Drawable[]{outline, mColoredCircleBackground});
-        int strokeWidth = (int) (mDensity * 3);
-        background.setLayerInset(1, strokeWidth, strokeWidth, strokeWidth, strokeWidth);
-        return background;
-    }
-
-    private SquareTextView makeSquareTextView(Context context) {
-        SquareTextView squareTextView = new SquareTextView(context);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        squareTextView.setLayoutParams(layoutParams);
-
-        int twelveDpi = (int) (12 * mDensity);
-        squareTextView.setPadding(twelveDpi, twelveDpi, twelveDpi, twelveDpi);
-        return squareTextView;
-    }
-
-    protected int getColor(int clusterSize) {
-        final float hueRange = 220;
-        final float sizeRange = 300;
-        final float size = Math.min(clusterSize, sizeRange);
-        final float hue = (sizeRange - size) * (sizeRange - size) / (sizeRange * sizeRange) * hueRange;
-        return Color.HSVToColor(new float[]{
-                hue, 1f, .6f
-        });
-    }
-
-    protected String getClusterText(int bucket) {
-        if (bucket < BUCKETS[0]) {
-            return String.valueOf(bucket);
-        }
-        return String.valueOf(bucket) + "+";
-    }
-
-    /**
-     * Gets the "bucket" for a particular cluster. By default, uses the number of points within the
-     * cluster, bucketed to some set points.
-     */
-    protected int getBucket(Cluster<T> cluster) {
-        int size = cluster.getSize();
-        if (size <= BUCKETS[0]) {
-            return size;
-        }
-        for (int i = 0; i < BUCKETS.length - 1; i++) {
-            if (size < BUCKETS[i + 1]) {
-                return BUCKETS[i];
-            }
-        }
-        return BUCKETS[BUCKETS.length - 1];
-    }
 
     public int getMinClusterSize() {
         return mMinClusterSize;
@@ -723,7 +667,13 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
     protected void onBeforeClusterItemRendered(T item, MarkerOptions markerOptions) {
     }
 
-    private Bitmap urlToImg (String imageUrl) {
+    /**
+     * Creates a HttpUrlConnection, and creates a connection with the given URL.
+     * Then returns a mutable copy of the decoded BitMap stream.
+     * @param imageUrl
+     * @return Bitmap
+     */
+    private Bitmap produceImageFromUrl (String imageUrl, int size) {
         URL url = null;
         try {
             url = new URL(imageUrl);
@@ -733,7 +683,9 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                 conn.setDoInput(true);
                 conn.connect();
                 InputStream is = conn.getInputStream();
-                return BitmapFactory.decodeStream(is);
+                Bitmap image = BitmapFactory.decodeStream(is).copy(Bitmap.Config.ARGB_8888, true);
+
+                return Bitmap.createScaledBitmap(image, size, size, true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -741,30 +693,6 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
             e.printStackTrace();
         }
         return null;
-    }
-    /**
-     * Called before the marker for a Cluster is added to the map.
-     * The default implementation draws a circle with a rough count of the number of items.
-     */
-    protected void onBeforeClusterRendered(Cluster<T> cluster, MarkerOptions markerOptions) {
-        int bucket = getBucket(cluster);
-        TweetNode mNode = (TweetNode) cluster;
-        BitmapDescriptor descriptor = mIcons.get(bucket);
-        if (descriptor == null) {
-            mColoredCircleBackground.getPaint().setColor(getColor(bucket));
-            Bitmap nodeImg = urlToImg(mNode.getStatus().getUser().getProfileImageURL());
-            nodeImg = nodeImg != null ? nodeImg : mIconGenerator.makeIcon(getClusterText(bucket));
-
-            nodeImg.setWidth(bucket);
-            nodeImg.setHeight(bucket);
-
-            descriptor = BitmapDescriptorFactory.fromBitmap(nodeImg);
-            mIcons.put(bucket, descriptor);
-        }
-
-        markerOptions.anchor(.5f, .5f);
-        markerOptions.icon(descriptor);
-        markerOptions.title(mNode.getStatus().getUser().getName());
     }
 
     /**
@@ -835,7 +763,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
             this.animateFrom = animateFrom;
         }
 
-        private void perform(MarkerModifier markerModifier) {
+        private void perform(final MarkerModifier markerModifier) {
             // Don't show small clusters. Render the markers inside, instead.
             if (!shouldRenderAsCluster(cluster)) {
                 for (T item : cluster.getItems()) {
@@ -849,6 +777,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                             markerOptions.position(item.getPosition());
                         }
                         onBeforeClusterItemRendered(item, markerOptions);
+
                         marker = mClusterManager.getMarkerCollection().addMarker(markerOptions);
                         markerWithPosition = new MarkerWithPosition(marker);
                         mMarkerCache.put(item, marker);
@@ -867,17 +796,55 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
             MarkerOptions markerOptions = new MarkerOptions().
                     position(animateFrom == null ? cluster.getPosition() : animateFrom);
 
-            onBeforeClusterRendered(cluster, markerOptions);
+            new AsyncTask<MarkerOptions, Void, MarkerOptions> () {
+                @Override
+                protected MarkerOptions doInBackground(MarkerOptions... params) {
+                    Log.v(TAG, "AsyncTask - Getting image");
 
-            Marker marker = mClusterManager.getClusterMarkerCollection().addMarker(markerOptions);
-            mMarkerToCluster.put(marker, cluster);
-            mClusterToMarker.put(cluster, marker);
-            MarkerWithPosition markerWithPosition = new MarkerWithPosition(marker);
-            if (animateFrom != null) {
-                markerModifier.animate(markerWithPosition, animateFrom, cluster.getPosition());
-            }
-            onClusterRendered(cluster, marker);
-            newMarkers.add(markerWithPosition);
+                    MarkerOptions markerOptions = params[0];
+
+                    TweetNode mNode = null;
+                    Iterator<T> items = cluster.getItems().iterator();
+                    int clusterSize = 0;
+
+                    while (items.hasNext()) {
+                        TweetNode currentNode = (TweetNode) items.next();
+                        if (mNode == null)
+                            mNode = currentNode;
+                        if (mNode.getSize() < currentNode.getSize()) {
+                            mNode = currentNode;
+                        }
+                        clusterSize += currentNode.getSize();
+                    }
+
+                    String iconUrl = mNode.getStatus().getUser().getProfileImageURL();
+                    Bitmap mNodeIcon = produceImageFromUrl(iconUrl, clusterSize);
+
+                    BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mNodeIcon);
+
+                    markerOptions.anchor(.5f, .5f);
+                    markerOptions.icon(descriptor);
+                    markerOptions.title(mNode.getStatus().getUser().getName());
+                    return markerOptions;
+                }
+
+                @Override
+                protected void onPostExecute(MarkerOptions markerOptions) {
+                    super.onPostExecute(markerOptions);
+
+                    Marker marker = mClusterManager.getClusterMarkerCollection().addMarker(markerOptions);
+                    mMarkerToCluster.put(marker, cluster);
+                    mClusterToMarker.put(cluster, marker);
+                    MarkerWithPosition markerWithPosition = new MarkerWithPosition(marker);
+
+                    if (animateFrom != null) {
+                        markerModifier.animate(markerWithPosition, animateFrom, cluster.getPosition());
+                    }
+                    onClusterRendered(cluster, marker);
+
+                    newMarkers.add(markerWithPosition);
+                }
+            }.execute(markerOptions);
         }
     }
 
