@@ -52,7 +52,7 @@ public class TweetListFragment extends Fragment {
 
     public TweetListFragment(ArrayList tweetNodes) {
         this.tweetNodes = tweetNodes;
-        location = (tweetNodes.size() > 0)? this.tweetNodes.get(0).getPosition(): new LatLng(0,0);
+        location = (tweetNodes.size() > 0)? this.tweetNodes.get(0).getPosition(): new LatLng(45.383082, -75.698312);
     }
 
     public boolean insert (TweetNode item) {
@@ -72,11 +72,9 @@ public class TweetListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -84,9 +82,37 @@ public class TweetListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tweet_list, container, false);
 
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+        final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar.hasExpandedActionView();
+        // done nav separately so it appears on the far left side
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbar.getMenu().clear();
+                getActivity().onBackPressed();
+            }
+        });
+        toolbar.inflateMenu(R.menu.tweet_list_menu);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
 
+                switch (item.getItemId()) {
+                    case R.id.menu_directions:
+                        Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW,
+                                getDirectionsUri());
+                        startActivity(mapIntent);
+                        return true;
+
+                    case R.id.share:
+                        // implement the share info
+                    default:
+                        return false;
+
+                }
+            }
+        });
 
 
         // Set the adapter
@@ -107,39 +133,12 @@ public class TweetListFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.clear();
-        inflater.inflate(R.menu.tweet_list_menu, menu);
-    }
-
-
-    public boolean onOptionItemIsSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.menu_directions:
-                Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW,
-                        getDirectionsUri());
-                startActivity(mapIntent);
-                return true;
-
-            case R.id.back_to_map:
-                Log.v("TweetListFragment --", "back");
-                getActivity().getFragmentManager().popBackStack();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-
-        }
-    }
-
-
     private Uri getDirectionsUri(){
+
         double destLat  = location.latitude;
         double destLong = location.longitude;
-        String directionsFromCurrentLocation =  "http://maps.google.com/maps?daddr= %d,%d";
-        //String directionsFromDifferentAddress = "http://maps.google.com/maps?saddr=%d,%d&daddr= %d,%d";
+        String directionsFromCurrentLocation =  "http://maps.google.com/maps?daddr= %f,%f";
+        //String directionsFromDifferentAddress = "http://maps.google.com/maps?saddr=%f,%f&daddr= %f,%f";
         String uri = String.format(directionsFromCurrentLocation, destLat, destLong);
         return Uri.parse(uri);
     }
