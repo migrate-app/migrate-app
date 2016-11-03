@@ -747,8 +747,8 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
      * The default implementation draws a circle with a rough count of the number of items.
      */
     protected void onBeforeClusterRendered(Cluster<T> cluster, MarkerOptions markerOptions) {
-/*        int bucket = getBucket(cluster);
-//        TweetNode mNode = (TweetNode) cluster;
+        int bucket = getBucket(cluster);
+        TweetNode mNode = (TweetNode) cluster;
         BitmapDescriptor descriptor = mIcons.get(bucket);
         if (descriptor == null) {
             mColoredCircleBackground.getPaint().setColor(getColor(bucket));
@@ -764,7 +764,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
 
         markerOptions.anchor(.5f, .5f);
         markerOptions.icon(descriptor);
-        markerOptions.title(mNode.getStatus().getUser().getName());*/
+        markerOptions.title(mNode.getStatus().getUser().getName());
     }
 
     /**
