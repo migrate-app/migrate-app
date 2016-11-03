@@ -684,8 +684,8 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                 conn.connect();
                 InputStream is = conn.getInputStream();
                 Bitmap image = BitmapFactory.decodeStream(is).copy(Bitmap.Config.ARGB_8888, true);
-
-                return Bitmap.createScaledBitmap(image, size, size, true);
+                // Bitmap.createScaledBitmap(image, size, size, true);
+                return image;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -816,6 +816,10 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                         }
                         clusterSize += currentNode.getSize();
                     }
+                    Log.v("Cluster - Identifier - ", cluster.hashCode() + "");
+                    Log.v("Cluster - Popular Node" + mNode, "Coolest user here");
+                    Log.v("Cluster-Cluster.getSize", cluster.getSize() + "");
+                    Log.v("Cluster-clusterSize", clusterSize + "");
 
                     String iconUrl = mNode.getStatus().getUser().getProfileImageURL();
                     Bitmap mNodeIcon = produceImageFromUrl(iconUrl, clusterSize);
