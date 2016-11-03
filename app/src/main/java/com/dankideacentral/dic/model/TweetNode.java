@@ -57,7 +57,7 @@ public class TweetNode extends WeightedNode {
     public int getWeight() {
         return ((int) Math.ceil(
             Math.log(status.getFavoriteCount()) +
-            Math.log(status.getRetweetCount()) +
+            Math.log(status.getRetweetCount())  +
             (status.getUser().isVerified() ? 1 : 0))
         );
 
