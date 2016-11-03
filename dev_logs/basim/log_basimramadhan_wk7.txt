@@ -1,0 +1,7 @@
+Weekly Duties (Hours spent are in brackets)
+Basim Ramadhan - 100901646
+--------------------------------------------
+- Team meeting on Thursday (1h)
+- Tried to set up toolbars (4h)
+- Finished SettingsActivity (3h)
+- Updated tablet view (1h)

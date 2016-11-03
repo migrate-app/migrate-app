@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:external="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="General"
+        android:key="pref_key_general_settings">
+        <SwitchPreference
+            android:key="pref_key_pause_tweet_stream"
+            android:title="Pause tweet stream"
+            android:summary="Stop receiving new tweets"
+            android:defaultValue="false" />
+        <Preference android:title="Sign Out" >
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://www.example.com" />
+        </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Location"
+        android:key="pref_key_location_settings">
+        <SwitchPreference
+            android:key="pref_key_enable_geolocation"
+            android:title="Enable geolocation"
+            android:summary=""
+            android:defaultValue="true" />
+        <com.pavelsikun.seekbarpreference.SeekBarPreference
+            android:key="pref_key_search_radius"
+            android:title="Search radius"
+            android:summary=""
+            android:enabled="true"
+            android:defaultValue="10"
+
+            external:msbp_minValue="1"
+            external:msbp_maxValue="50"
+            external:msbp_interval="1"
+            external:msbp_measurementUnit="km"
+            external:msbp_dialogEnabled="true"
+            android:id="@+id/seekBarPreference" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Notifications"
+        android:key="pref_key_notification_settings">
+        <SwitchPreference
+            android:key="pref_key_push_notifications"
+            android:title="Enable push notifications"
+            android:summary="Be notified when your friends tweet near you"
+            android:defaultValue="true" />
+        <SwitchPreference
+            android:dependency="pref_key_push_notifications"
+            android:key="pref_key_vibrate_on_notification"
+            android:title="Vibrate"
+            android:summary=""
+            android:defaultValue="true" />
+        <SwitchPreference
+            android:dependency="pref_key_push_notifications"
+            android:key="pref_key_light_on_notification"
+            android:title="Light"
+            android:summary=""
+            android:defaultValue="true" />
+        <RingtonePreference
+            android:dependency="pref_key_push_notifications"
+            android:key="pref_key_notification_ringtone"
+            android:title="Notification ringtone"
+            android:summary=""
+            android:defaultValue="content://settings/system/notification_sound"
+            android:ringtoneType="notification" />
+    </PreferenceCategory>
+</PreferenceScreen>
