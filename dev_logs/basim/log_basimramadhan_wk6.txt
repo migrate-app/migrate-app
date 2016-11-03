@@ -1,0 +1,6 @@
+Weekly Duties (Hours spent are in brackets)
+Basim Ramadhan - 100901646
+--------------------------------------------
+- Team meeting on Thursday (1h)
+- Created basic SettingsActivity template with basic options (10h)
+- Added basic tablet support for the settings activity (1h)

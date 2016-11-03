@@ -1,5 +1,7 @@
 package com.dankideacentral.dic;
 
+import android.util.Log;
+
 import twitter4j.GeoLocation;
 
 /**
@@ -7,11 +9,11 @@ import twitter4j.GeoLocation;
  */
 
 public class GeolocationFilter {
-
+    public static final String TAG = "GEOLOCATION_FILTER";
     // either the current location or the searched location
     private GeoLocation searchLocation = null;
     private int radius = 0; // in KM
-    private final int EARTH_RADIUS = 6371;
+    private static final int EARTH_RADIUS = 6371;
 
     public GeolocationFilter(GeoLocation searchRegion, int radius) {
         searchLocation = searchRegion;
@@ -40,7 +42,36 @@ public class GeolocationFilter {
         return (getDistanceFromSearchLocationToTweet(tweetLocation) <= radius)? true: false;
     }
 
+    /**
+     * Takes coordinates (X,Y) -> X is lon, Y is lat (Degrees)
+     * Interprets coordinates as the center.
+     *
+     * Produces SW and NE coordinates to form BoundingBox
+     *
+     * @param lon -> X
+     * @param lat -> Y
+     * @param radius (km)
+     * @return {String: BoundingBox}
+     */
+    public static double [][] coordinatesToBoundingBox (double lon, double lat, int radius) {
 
+
+        double
+            dY = 360 * radius / EARTH_RADIUS,
+            dX = dY * Math.cos(Math.toRadians(lat));
+        double
+            x1 = lon - dX,
+            y1 = lat - dY;
+
+        double
+            x2 = lon + dX,
+            y2 = lat + dY;
+
+        Log.d(TAG.concat("- Bounding Box"), x1 + ", " + y1 + ", " + x2 + ", " + y2);
+        double[][] box = {{x1,y1}, {x2,y2}};
+
+        return box;
+    }
     // implementation of the Haversine formula
 
     private double getDistanceFromSearchLocationToTweet(GeoLocation tweetLocation){
