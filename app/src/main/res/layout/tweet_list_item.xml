@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="500px"
+    android:layout_height="300px"
+    android:background = "#f9f9f9"
     android:orientation="horizontal">
 
-    <RelativeLayout android:layout_height="200px"
+    <RelativeLayout android:layout_height="125px"
         android:layout_width="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_margin="20px"
+        android:layout_margin="5px"
         android:id = "@+id/tweet_header">
         <ImageView
-            android:layout_width="100px"
-            android:layout_height="100px"
+            android:layout_width="115px"
+            android:layout_height="115px"
             android:layout_alignParentLeft="true"
-            android:layout_margin = "20px"
+            android:layout_centerVertical="true"
+            android:layout_margin = "3px"
+            android:src = "@mipmap/ic_launcher"
             android:id = "@+id/tweet_image"
             android:layout_alignParentTop="true"/>
 
@@ -21,17 +24,20 @@
             android:layout_width="wrap_content"
             android:id = "@+id/tweet_handle"
             android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/tweet_image"
             android:text = "Tweeter"
-            android:layout_alignLeft="@id/tweet_image"/>
+            />
 
     </RelativeLayout>
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="300px"
+        android:layout_height="175px"
         android:id = "@+id/tweet_view_content"
-        android:layout_below="@+id/tweet_header"
         android:text = "Tweet Body"
-        />
+        android:layout_marginLeft="8px"
+        android:layout_marginRight="8px"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id = "@+id/back_to_map"
+        android:icon="@drawable/ic_arrow_back_white_24dp"
+        android:title="@string/back_to_map"
+        />
+    <item
+        android:id="@+id/menu_directions"
+        android:icon="@drawable/ic_directions_white_24dp"
+        android:title="@string/directions"
+        />
+</menu>

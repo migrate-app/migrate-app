@@ -19,7 +19,7 @@
         android:elevation="4dp"
         android:theme="@style/AppTheme"
         app:popupTheme="@style/AppTheme">
-
+<!--
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,6 +29,7 @@
             android:id="@+id/toolbar_title"
             android:textAppearance="@style/Bubble.TextAppearance.Light"
             android:textSize="24sp" />
+            -->
 
     </android.support.v7.widget.Toolbar>
 </FrameLayout>
