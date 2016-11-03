@@ -78,12 +78,9 @@ public class TweetFeedActivity extends BaseMapActivity
 
         // Set the navigation icon of the tool bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //toolbar.setNavigationIcon(R.drawable.ic_nav_button);
-        //setSupportActionBar(toolbar);
-        //getActionBar().setDisplayShowTitleEnabled(false);
+        toolbar.setNavigationIcon(R.drawable.ic_nav_button);
 
-
-        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer. Use [onOptionItemIsSelected]
+        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer.
 
         listFragment = new TweetListFragment();
 
@@ -256,13 +253,9 @@ public class TweetFeedActivity extends BaseMapActivity
         // put code to handle actionbar items.. make sure you call super.onOptionItemSelected(item) as the default.
 
         switch (item.getItemId()) {
-            case R.id.back_to_map:
-                Log.v("TweetListActivity --", "back");
-                getFragmentManager().popBackStack();
-                return true;
 
             default:
-                return super.onOptionsItemSelected(item);
+                return false;
 
         }
 
