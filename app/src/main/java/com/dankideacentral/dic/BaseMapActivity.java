@@ -4,7 +4,10 @@ import android.content.Context;
 import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.dankideacentral.dic.algo.WeightedNodeAlgorithm;
 import com.dankideacentral.dic.model.TweetNode;
+import com.dankideacentral.dic.model.WeightedNode;
+import com.dankideacentral.dic.view.WeightedNodeRenderer;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -20,9 +23,15 @@ import java.util.Set;
 /**
  * Created by srowhani on 10/6/16.
  */
-public abstract class BaseMapActivity extends AppCompatActivity implements OnMapReadyCallback{
+
+public abstract class BaseMapActivity extends AppCompatActivity implements
+        OnMapReadyCallback, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener {
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
+
+    private ClusterManager <TweetNode> mClusterManager;
+    private WeightedNodeAlgorithm <TweetNode> mNodeAlgorithm;
+    private WeightedNodeRenderer <TweetNode> mNodeRenderer;
 
     public BaseMapActivity () {
         mapFragment = SupportMapFragment.newInstance();
@@ -39,48 +48,24 @@ public abstract class BaseMapActivity extends AppCompatActivity implements OnMap
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         LocationManager locationManager = (LocationManager)
                 getSystemService(Context.LOCATION_SERVICE);
-        ClusterManager<TweetNode> clusterManager = new ClusterManager(this, mMap);
-        clusterManager.setRenderer(new ClusterRenderer<TweetNode>() {
-            @Override
-            public void onClustersChanged(Set<? extends Cluster<TweetNode>> set) {
 
-            }
 
-            @Override
-            public void setOnClusterClickListener(ClusterManager.OnClusterClickListener<TweetNode> onClusterClickListener) {
+        mClusterManager = new ClusterManager(this, mMap);
+        mNodeAlgorithm = new WeightedNodeAlgorithm <TweetNode>();
+        mNodeRenderer = new WeightedNodeRenderer<TweetNode>(this, mMap, mClusterManager);
 
-            }
+        mClusterManager.setAlgorithm(mNodeAlgorithm);
+        mClusterManager.setRenderer(mNodeRenderer);
 
-            @Override
-            public void setOnClusterInfoWindowClickListener(ClusterManager.OnClusterInfoWindowClickListener<TweetNode> onClusterInfoWindowClickListener) {
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnCameraChangeListener(mClusterManager);
 
-            }
-
-            @Override
-            public void setOnClusterItemClickListener(ClusterManager.OnClusterItemClickListener<TweetNode> onClusterItemClickListener) {
-
-            }
-
-            @Override
-            public void setOnClusterItemInfoWindowClickListener(ClusterManager.OnClusterItemInfoWindowClickListener<TweetNode> onClusterItemInfoWindowClickListener) {
-
-            }
-
-            @Override
-            public void onAdd() {
-
-            }
-
-            @Override
-            public void onRemove() {
-
-            }
-        });
-        mMap.setOnMarkerClickListener(clusterManager);
-
-        mapReady(mMap, locationManager, clusterManager);
+        mClusterManager.setOnClusterClickListener(this);
+        mClusterManager.setOnClusterItemClickListener(this);
+        mapReady(mMap, locationManager, mClusterManager);
     }
 
     public abstract void mapReady (GoogleMap map, LocationManager lm, ClusterManager cm);
