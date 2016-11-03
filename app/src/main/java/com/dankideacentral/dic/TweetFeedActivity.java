@@ -85,6 +85,8 @@ public class TweetFeedActivity extends BaseMapActivity
         // Grab LatLng object from intent extra
         LatLng latLng = getIntent().getParcelableExtra(getString(
                 R.string.search_location_key));
+        // Start and bind the tweet stream service
+        startTwitterStreamService(latLng);
 
         // Case LatLng object returned is null (Could mean activity loaded on startup)
         if (latLng == null) {
@@ -142,9 +144,6 @@ public class TweetFeedActivity extends BaseMapActivity
 
                 // Move the map to the specified latitude and longitude
                 getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
-
-                // Start and bind the tweet stream service
-                startTwitterStreamService(latLng);
             }
         };
     }
@@ -157,14 +156,16 @@ public class TweetFeedActivity extends BaseMapActivity
      *          The {@link LatLng} location to open the service at.
      */
     private void startTwitterStreamService(LatLng latLng) {
-        double lat = latLng.latitude;
-        double log = latLng.longitude;
-
+        latLng = latLng != null
+                ? latLng
+                : new LatLng(
+                    Double.parseDouble(getString(R.string.intent_lat)),
+                    Double.parseDouble(getString(R.string.intent_long)));
         // Start and bind TwitterStreamService
         Intent startIntent = new Intent(this, TwitterStreamService.class);
         // put the radius and location on the intent
-        startIntent.putExtra(getString(R.string.intent_lat), lat);
-        startIntent.putExtra(getString(R.string.intent_long), log);
+        startIntent.putExtra(getString(R.string.intent_lat), latLng.latitude);
+        startIntent.putExtra(getString(R.string.intent_long), latLng.longitude);
         startService(startIntent);
     }
 
@@ -181,6 +182,7 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public boolean onClusterItemClick(ClusterItem clusterItem) {
         Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
+
         return false;
     }
 
