@@ -118,7 +118,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setupActionBar();
 
         // Display all the settings on this activity as long as the device is not a tablet.
         if(!this.onIsMultiPane()) {

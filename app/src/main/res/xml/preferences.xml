@@ -9,6 +9,10 @@
             android:title="Pause tweet stream"
             android:summary="Stop receiving new tweets"
             android:defaultValue="false" />
+        <Preference android:title="Sign Out" >
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://www.example.com" />
+        </Preference>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Location"
