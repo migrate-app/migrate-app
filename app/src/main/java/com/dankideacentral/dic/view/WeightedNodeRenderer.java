@@ -7,13 +7,8 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -667,33 +662,6 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
     protected void onBeforeClusterItemRendered(T item, MarkerOptions markerOptions) {
     }
 
-    /**
-     * Creates a HttpUrlConnection, and creates a connection with the given URL.
-     * Then returns a mutable copy of the decoded BitMap stream.
-     * @param imageUrl
-     * @return Bitmap
-     */
-    private Bitmap produceImageFromUrl (String imageUrl, int size) {
-        URL url = null;
-        try {
-            url = new URL(imageUrl);
-            HttpURLConnection conn = null;
-            try {
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoInput(true);
-                conn.connect();
-                InputStream is = conn.getInputStream();
-                Bitmap image = BitmapFactory.decodeStream(is).copy(Bitmap.Config.ARGB_8888, true);
-                // Bitmap.createScaledBitmap(image, size, size, true);
-                return image;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * Called after the marker for a Cluster has been added to the map.
@@ -763,6 +731,10 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
             this.animateFrom = animateFrom;
         }
 
+        /**
+         * Renders a cluster object.
+         * @param markerModifier
+         */
         private void perform(final MarkerModifier markerModifier) {
             // Don't show small clusters. Render the markers inside, instead.
             if (!shouldRenderAsCluster(cluster)) {
@@ -816,15 +788,16 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                         }
                         clusterSize += currentNode.getSize();
                     }
-                    Log.v("Cluster - Identifier - ", cluster.hashCode() + "");
+
+                    Log.v("Cluster - Identifier", cluster.hashCode() + "");
                     Log.v("Cluster - Popular Node" + mNode, "Coolest user here");
-                    Log.v("Cluster-Cluster.getSize", cluster.getSize() + "");
-                    Log.v("Cluster-clusterSize", clusterSize + "");
+                    Log.v("Cluster - clusterSize", clusterSize + "");
 
-                    String iconUrl = mNode.getStatus().getUser().getProfileImageURL();
-                    Bitmap mNodeIcon = produceImageFromUrl(iconUrl, clusterSize);
-
-                    BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mNodeIcon);
+                    Bitmap mIcon = mNode.getIcon();
+                    int size = (int) mDensity;
+                    // TODO: Implement proper scaling and colouring of nodes.
+                    // mIcon = Bitmap.createScaledBitmap(mIcon, size, size, true);
+                    BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mIcon);
 
                     markerOptions.anchor(.5f, .5f);
                     markerOptions.icon(descriptor);
