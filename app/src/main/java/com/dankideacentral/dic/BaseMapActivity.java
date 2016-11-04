@@ -61,7 +61,6 @@ public abstract class BaseMapActivity extends AppCompatActivity implements
         mClusterManager.setRenderer(mNodeRenderer);
 
         mMap.setOnMarkerClickListener(mClusterManager);
-        mMap.setOnCameraChangeListener(mClusterManager);
 
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);

@@ -50,6 +50,7 @@ public class TweetFeedActivity extends BaseMapActivity
     private static final int MIN_TIME = 250; //milliseconds
     private static final int MIN_DISTANCE = 0;
 
+    private LatLng currentLocation;
     private ClusterManager<TweetNode> clusterManager;
 
     private TweetListFragment listFragment;
@@ -58,6 +59,15 @@ public class TweetFeedActivity extends BaseMapActivity
 
     private ArrayList<TweetNode> tweets = new ArrayList<>();
     private Button toggleButton;
+
+    @Override
+    public void onStart () {
+        super.onStart();
+        if (currentLocation != null) {
+            Log.v(getClass().getName(), "onStart - Rebooting Service with saved current loc");
+            startTwitterStreamService(currentLocation);
+        }
+    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -98,17 +108,17 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public void mapReady(GoogleMap map, LocationManager lm, final ClusterManager cm) {
         // Grab LatLng object from intent extra
-        LatLng latLng = getIntent().getParcelableExtra(getString(
+        currentLocation = getIntent().getParcelableExtra(getString(
                 R.string.search_location_key));
         // Start and bind the tweet stream service
-        startTwitterStreamService(latLng);
+        startTwitterStreamService(currentLocation);
 
         // Case LatLng object returned is null (Could mean activity loaded on startup)
-        if (latLng == null) {
+        if (currentLocation == null) {
             getCurrentLocation();
         } else {
             // Move the map to the specified latitude and longitude
-            getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
+            getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_ZOOM_DISTANCE));
         }
 
         // set up broadcast receiver
@@ -172,11 +182,6 @@ public class TweetFeedActivity extends BaseMapActivity
      * @param latLng The {@link LatLng} location to open the service at.
      */
     private void startTwitterStreamService(LatLng latLng) {
-        latLng = latLng != null
-                ? latLng
-                : new LatLng(
-                    Double.parseDouble(getString(R.string.intent_lat)),
-                    Double.parseDouble(getString(R.string.intent_long)));
         // Start and bind TwitterStreamService
         Intent startIntent = new Intent(this, TwitterStreamService.class);
         // put the radius and location on the intent
@@ -238,8 +243,8 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onStop() {
         super.onStop();
-        // Unbind from the service
 
+        // Unbind from the service
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
     }

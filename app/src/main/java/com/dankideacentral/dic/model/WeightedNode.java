@@ -9,7 +9,7 @@ import com.google.maps.android.clustering.ClusterItem;
  */
 
 public abstract class WeightedNode implements ClusterItem {
-    public abstract int getWeight();
+    public abstract int getSize();
 
 }
 

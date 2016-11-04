@@ -63,7 +63,7 @@ public class WeightedNodeAlgorithm <T extends WeightedNode> implements Algorithm
 
         @Override
         public int getSize() {
-            return mClusterItem.getWeight();
+            return mClusterItem.getSize();
         }
 
         @Override
