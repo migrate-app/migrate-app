@@ -8,6 +8,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 
@@ -98,9 +100,9 @@ public class TweetFeedActivity extends BaseMapActivity
                 newFragment.setArguments(args);
 
                 getSupportFragmentManager().beginTransaction()
-                .add(R.id.activity_tweet_feed, newFragment)
-                .addToBackStack(null)
-                .commit();
+                    .add(R.id.activity_tweet_feed, newFragment)
+                    .addToBackStack(null)
+                    .commit();
             }
         });
     }
@@ -126,11 +128,23 @@ public class TweetFeedActivity extends BaseMapActivity
             @Override
             public void onReceive(Context context, Intent intent) {
                 Status tweet = (Status) intent.getExtras().get("tweet");
-                TweetNode tweetNode = new TweetNode(tweet);
+                final TweetNode mNode = new TweetNode(tweet);
+                mNode.processImage(new Handler.Callback() {
+                    @Override
+                    public boolean handleMessage(Message msg) {
+                        try {
+                            tweets.add(mNode);
+                            clusterManager.addItem(mNode);
+                            clusterManager.cluster();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return false;
+                        }
+                        return true;
+                    }
+                });
                 Log.v("Received Tweet: ", tweet.toString());
-                tweets.add(tweetNode);
-                clusterManager.addItem(tweetNode);
-                clusterManager.cluster();
+
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
 
@@ -253,10 +267,8 @@ public class TweetFeedActivity extends BaseMapActivity
         // put code to handle actionbar items.. make sure you call super.onOptionItemSelected(item) as the default.
 
         switch (item.getItemId()) {
-
             default:
                 return false;
-
         }
 
     }
