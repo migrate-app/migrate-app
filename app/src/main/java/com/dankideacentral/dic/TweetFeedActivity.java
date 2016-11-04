@@ -82,7 +82,6 @@ public class TweetFeedActivity extends BaseMapActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
 
-
         // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer.
 
         listFragment = new TweetListFragment();
@@ -270,7 +269,6 @@ public class TweetFeedActivity extends BaseMapActivity
         switch (item.getItemId()) {
             default:
                 return false;
-
         }
 
     }
