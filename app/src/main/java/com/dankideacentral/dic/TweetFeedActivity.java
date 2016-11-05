@@ -11,13 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-
 
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
@@ -257,8 +252,15 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onStop() {
         super.onStop();
+        killService();
+    }
+    @Override
+    protected void onDestroy () {
+        super.onDestroy();
+        killService();
+    }
 
-        // Unbind from the service
+    private void killService () {
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
     }
