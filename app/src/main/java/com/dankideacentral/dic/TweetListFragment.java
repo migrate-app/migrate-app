@@ -50,10 +50,10 @@ public class TweetListFragment extends Fragment {
      */
     public TweetListFragment() {}
 
-    public TweetListFragment(ArrayList tweetNodes) {
-        this.tweetNodes = tweetNodes;
-        location = (tweetNodes.size() > 0)? this.tweetNodes.get(0).getPosition(): new LatLng(45.383082, -75.698312);
-    }
+//    public TweetListFragment(ArrayList tweetNodes) {
+//        this.tweetNodes = tweetNodes;
+//        location = (tweetNodes.size() > 0) ? this.tweetNodes.get(0).getPosition(): new LatLng(45.383082, -75.698312);
+//    }
 
     public boolean insert (TweetNode item) {
         return recyclerViewAdapter.insert(item);
@@ -73,6 +73,7 @@ public class TweetListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            tweetNodes = getArguments().getParcelableArrayList("TWEETS");
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
     }

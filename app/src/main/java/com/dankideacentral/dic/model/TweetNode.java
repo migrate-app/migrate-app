@@ -105,8 +105,5 @@ public class TweetNode extends WeightedNode {
         return mStatus.getHashtagEntities().length
                 + mStatus.getUserMentionEntities().length
                 + (int) Math.log(mStatus.getUser().getFollowersCount());
-
-
     }
-
 }
