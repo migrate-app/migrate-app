@@ -10,14 +10,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
+import android.support.design.internal.ParcelableSparseArray;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-
 
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +26,7 @@ import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.model.TweetNode;
+import com.dankideacentral.dic.model.WeightedNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,6 +38,8 @@ import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import twitter4j.Status;
 
@@ -94,15 +94,17 @@ public class TweetFeedActivity extends BaseMapActivity
             @Override
             public void onClick(View v) {
                 // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
-                TweetListFragment newFragment = new TweetListFragment(tweets);
-                Bundle args = new Bundle();
-                //args.putParcelableArray("TWEET_LIST", cluster.getItems().toArray());
-                newFragment.setArguments(args);
-
-                getSupportFragmentManager().beginTransaction()
-                    .add(R.id.activity_tweet_feed, newFragment)
-                    .addToBackStack(null)
-                    .commit();
+//                TweetListFragment newFragment = TweetListFragment.newInstance(1);
+//                Bundle args = new Bundle();
+//                ArrayList <TweetNode> clusterItems = new ArrayList<TweetNode>(cluster.getItems());
+//
+//                args.putParcelableArrayList("TWEETS", clusterItems);
+//                newFragment.setArguments(args);
+//
+//                getSupportFragmentManager().beginTransaction()
+//                    .add(R.id.activity_tweet_feed, newFragment)
+//                    .addToBackStack(null)
+//                    .commit();
             }
         });
     }
@@ -213,9 +215,11 @@ public class TweetFeedActivity extends BaseMapActivity
     public boolean onClusterClick(Cluster cluster) {
         Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
         // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
-        TweetListFragment newFragment = new TweetListFragment(tweets);
+        TweetListFragment newFragment = TweetListFragment.newInstance(1);
         Bundle args = new Bundle();
-        //args.putParcelableArray("TWEET_LIST", cluster.getItems().toArray());
+        ArrayList <TweetNode> clusterItems = new ArrayList<TweetNode>(cluster.getItems());
+
+        args.putParcelableArrayList("TWEETS", clusterItems);
         newFragment.setArguments(args);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -257,8 +261,15 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onStop() {
         super.onStop();
+        killService();
+    }
+    @Override
+    protected void onDestroy () {
+        super.onDestroy();
+        killService();
+    }
 
-        // Unbind from the service
+    private void killService () {
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
     }

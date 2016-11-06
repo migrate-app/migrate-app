@@ -102,11 +102,8 @@ public class TweetNode extends WeightedNode {
 
     @Override
     public int getSize() {
-        return    mStatus.getHashtagEntities().length
+        return mStatus.getHashtagEntities().length
                 + mStatus.getUserMentionEntities().length
                 + (int) Math.log(mStatus.getUser().getFollowersCount());
-
-
     }
-
 }

@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -46,7 +47,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).getStatus().getUser().getName());
         holder.mContentView.setText(mValues.get(position).getStatus().getText());
-
+        holder.mImageView.setImageBitmap(mValues.get(position).getIcon());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,6 +70,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
+        public final ImageView mImageView;
         public TweetNode mItem;
 
         public ViewHolder(View view) {
@@ -77,6 +79,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
 
             mIdView = (TextView) view.findViewById(R.id.tweet_header).findViewById(R.id.tweet_handle);
             mContentView = (TextView) view.findViewById(R.id.tweet_view_content);
+            mImageView = (ImageView) view.findViewById(R.id.tweet_image);
         }
 
         @Override

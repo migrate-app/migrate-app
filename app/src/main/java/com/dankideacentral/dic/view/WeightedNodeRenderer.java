@@ -9,6 +9,10 @@ import android.annotation.TargetApi;
 import android.content.Context;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -20,6 +24,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
 
 import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.model.WeightedNode;
@@ -90,7 +95,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
     /**
      * If cluster size is less than this size, display individual markers.
      */
-    private int mMinClusterSize = 0;
+    private int mMinClusterSize = 35;
 
     /**
      * The currently displayed set of clusters.
@@ -241,7 +246,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
      * Determine whether the cluster should be rendered as individual markers or a cluster.
      */
     protected boolean shouldRenderAsCluster(Cluster<T> cluster) {
-        return true;
+        return cluster.getSize() >= mMinClusterSize;
     }
 
     /**
@@ -794,9 +799,13 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                     Log.v("Cluster - clusterSize", clusterSize + "");
 
                     Bitmap mIcon = mNode.getIcon();
-                    int size = (int) mDensity;
+                    int mScale = Math.max(1, (int) Math.ceil(Math.log(clusterSize)));
                     // TODO: Implement proper scaling and colouring of nodes.
-                    // mIcon = Bitmap.createScaledBitmap(mIcon, size, size, true);
+                    mIcon = Bitmap.createScaledBitmap(mIcon, mIcon.getWidth() + mScale, mIcon.getHeight() + mScale, true);
+
+
+                    mIcon = cfilter(mIcon, mScale % 255, 255, 255);
+
                     BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mIcon);
 
                     markerOptions.anchor(.5f, .5f);
@@ -824,7 +833,41 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
             }.execute(markerOptions);
         }
     }
+    private Bitmap cfilter(Bitmap src, double red, double green, double blue) {
+        red    /= 100;
+        green /= 100;
+        blue /= 100;
 
+        // image size
+        int width = src.getWidth();
+        int height = src.getHeight();
+        // create output bitmap
+        Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
+        // color information
+        int A, R, G, B;
+        int pixel;
+
+        // scan through all pixels
+        for(int x = 0; x < width; ++x) {
+            for(int y = 0; y < height; ++y) {
+                // get pixel color
+                pixel = src.getPixel(x, y);
+                // apply filtering on each channel R, G, B
+                A = Color.alpha(pixel);
+                R = (int)(Color.red(pixel) * red);
+                G = (int)(Color.green(pixel) * green);
+                B = (int)(Color.blue(pixel) * blue);
+                // set new color pixel to output bitmap
+                bmOut.setPixel(x, y, Color.argb(A, R, G, B));
+            }
+        }
+
+        src.recycle();
+        src = null;
+
+        // return final image
+        return bmOut;
+    }
     /**
      * A Marker and its position. Marker.getPosition() must be called from the UI thread, so this
      * object allows lookup from other threads.

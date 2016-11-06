@@ -57,7 +57,7 @@ public class TwitterStreamService extends Service {
         double lon = intent.getDoubleExtra(getString(R.string.intent_long), 0.0);
 
         FilterQuery mFilter = new FilterQuery();
-        mFilter.locations(GeolocationFilter.coordinatesToBoundingBox(lat, lon, radius));
+        mFilter.locations(GeolocationFilter.createBounds(lat, lon, radius));
         // set up the twitter stream
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(getString(R.string.twitter_consumer_key))
@@ -67,7 +67,6 @@ public class TwitterStreamService extends Service {
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance(accessToken);
         twitterStream.addListener(twitterStreamListener);
         // Begin filter stream
-
          twitterStream.filter(mFilter);
         //twitterStream.sample();
         return START_NOT_STICKY;
