@@ -16,7 +16,6 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_margin = "3px"
-            android:src = "@mipmap/ic_launcher"
             android:id = "@+id/tweet_image"
             android:layout_alignParentTop="true"/>
 
