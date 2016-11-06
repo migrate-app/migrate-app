@@ -52,8 +52,9 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
+
+        <!-- Authentication activities -->
         <activity android:name=".authentication.LoginActivity" />
         <activity android:name=".authentication.OAuthActivity" />
 

@@ -1,18 +1,32 @@
 package com.dankideacentral.dic;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.dankideacentral.dic.model.TweetNode;
+import com.google.android.gms.maps.model.LatLng;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+
+import twitter4j.GeoLocation;
 
 /**
  * A fragment representing a list of Items.
@@ -28,12 +42,18 @@ public class TweetListFragment extends Fragment {
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private MyItemRecyclerViewAdapter recyclerViewAdapter;
-
+    private ArrayList<TweetNode> tweetNodes = new <TweetNode> ArrayList();
+    private LatLng location;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public TweetListFragment() {}
+
+//    public TweetListFragment(ArrayList tweetNodes) {
+//        this.tweetNodes = tweetNodes;
+//        location = (tweetNodes.size() > 0) ? this.tweetNodes.get(0).getPosition(): new LatLng(45.383082, -75.698312);
+//    }
 
     public boolean insert (TweetNode item) {
         return recyclerViewAdapter.insert(item);
@@ -52,8 +72,8 @@ public class TweetListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
+            tweetNodes = getArguments().getParcelableArrayList("TWEETS");
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
     }
@@ -61,21 +81,69 @@ public class TweetListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.tweet_list_item, container, false);
+        View view = inflater.inflate(R.layout.tweet_list, container, false);
+
+        final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar.hasExpandedActionView();
+        // done nav separately so it appears on the far left side
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toolbar.getMenu().clear();
+                getActivity().onBackPressed();
+            }
+        });
+        toolbar.inflateMenu(R.menu.tweet_list_menu);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.menu_directions:
+                        Intent mapIntent = new Intent(android.content.Intent.ACTION_VIEW,
+                                getDirectionsUri());
+                        startActivity(mapIntent);
+                        return true;
+
+                    case R.id.share:
+                        // implement the share info
+                    default:
+                        return false;
+
+                }
+            }
+        });
+
 
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
+            RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(getResources().getDrawable(R.drawable.divider));
             RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView.addItemDecoration(dividerItemDecoration);
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(recyclerViewAdapter = new MyItemRecyclerViewAdapter(new ArrayList<TweetNode>(), mListener));
+
+            recyclerView.setAdapter(recyclerViewAdapter = new MyItemRecyclerViewAdapter(tweetNodes, mListener));
         }
         return view;
     }
+
+    private Uri getDirectionsUri(){
+
+        double destLat  = location.latitude;
+        double destLong = location.longitude;
+        String directionsFromCurrentLocation =  "http://maps.google.com/maps?daddr= %f,%f";
+        //String directionsFromDifferentAddress = "http://maps.google.com/maps?saddr=%f,%f&daddr= %f,%f";
+        String uri = String.format(directionsFromCurrentLocation, destLat, destLong);
+        return Uri.parse(uri);
+    }
+
 
     @Override
     public void onAttach(Context context) {

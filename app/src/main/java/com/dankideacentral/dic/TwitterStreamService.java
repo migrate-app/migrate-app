@@ -3,20 +3,33 @@ package com.dankideacentral.dic;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.util.Date;
+
+import twitter4j.ExtendedMediaEntity;
 import twitter4j.FilterQuery;
 import twitter4j.GeoLocation;
+import twitter4j.HashtagEntity;
+import twitter4j.MediaEntity;
+import twitter4j.Place;
+import twitter4j.RateLimitStatus;
+import twitter4j.Scopes;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import twitter4j.SymbolEntity;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
+import twitter4j.URLEntity;
+import twitter4j.User;
+import twitter4j.UserMentionEntity;
 import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 
@@ -28,6 +41,7 @@ public class TwitterStreamService extends Service {
     public String className = "TwitterStreamService";
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v(className, "Starting Twitter Stream");
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int radius = preferences.getInt(getString(R.string.preference_radius), 250); // radius in km
@@ -43,7 +57,7 @@ public class TwitterStreamService extends Service {
         double lon = intent.getDoubleExtra(getString(R.string.intent_long), 0.0);
 
         FilterQuery mFilter = new FilterQuery();
-        mFilter.locations(GeolocationFilter.coordinatesToBoundingBox(lat, lon, radius));
+        mFilter.locations(GeolocationFilter.createBounds(lat, lon, radius));
         // set up the twitter stream
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(getString(R.string.twitter_consumer_key))
@@ -53,8 +67,15 @@ public class TwitterStreamService extends Service {
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance(accessToken);
         twitterStream.addListener(twitterStreamListener);
         // Begin filter stream
-        twitterStream.filter(mFilter);
+         twitterStream.filter(mFilter);
+        //twitterStream.sample();
         return START_NOT_STICKY;
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.v(className, "Destroying Twitter Stream");
+        twitterStream.shutdown();
     }
 
     @Nullable
@@ -74,7 +95,6 @@ public class TwitterStreamService extends Service {
 
         @Override
         public void onStatus(Status status) {
-            Log.d(TAG.concat("- Tweet"), status.toString());
             GeoLocation tweetLocation = status.getGeoLocation();
 
             if (tweetLocation != null) {

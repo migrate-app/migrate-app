@@ -9,13 +9,20 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcelable;
+import android.support.design.internal.ParcelableSparseArray;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
+
+import android.support.v4.app.FragmentTransaction;
+
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -23,6 +30,7 @@ import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.model.TweetNode;
+import com.dankideacentral.dic.model.WeightedNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,7 +40,10 @@ import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -48,6 +59,7 @@ public class TweetFeedActivity extends BaseMapActivity
     private static final int MIN_TIME = 250; //milliseconds
     private static final int MIN_DISTANCE = 0;
 
+    private LatLng currentLocation;
     private ClusterManager<TweetNode> clusterManager;
 
     private TweetListFragment listFragment;
@@ -55,7 +67,17 @@ public class TweetFeedActivity extends BaseMapActivity
     private LocationFinder locationFinder;
     private Twitter twitter;
 
+    private ArrayList<TweetNode> tweets = new ArrayList<>();
     private Button toggleButton;
+
+    @Override
+    public void onStart () {
+        super.onStart();
+        if (currentLocation != null) {
+            Log.v(getClass().getName(), "onStart - Rebooting Service with saved current loc");
+            startTwitterStreamService(currentLocation);
+        }
+    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -69,6 +91,7 @@ public class TweetFeedActivity extends BaseMapActivity
         View navDrawer = setUpNavigationDrawer();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
+
         setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
 
         listFragment = new TweetListFragment();
@@ -80,11 +103,18 @@ public class TweetFeedActivity extends BaseMapActivity
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Fragment current = fm.find(CURRENT_FRAGMENT)
-                        instanceof TweetListFragment
-                            ? getFragment()
-                            : listFragment;
-                fm.create(R.id.layout_tweet_feed, current, CURRENT_FRAGMENT);
+                // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+//                TweetListFragment newFragment = TweetListFragment.newInstance(1);
+//                Bundle args = new Bundle();
+//                ArrayList <TweetNode> clusterItems = new ArrayList<TweetNode>(cluster.getItems());
+//
+//                args.putParcelableArrayList("TWEETS", clusterItems);
+//                newFragment.setArguments(args);
+//
+//                getSupportFragmentManager().beginTransaction()
+//                    .add(R.id.layout_tweet_feed, newFragment)
+//                    .addToBackStack(null)
+//                    .commit();
             }
         });
     }
@@ -92,15 +122,17 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public void mapReady(GoogleMap map, LocationManager lm, final ClusterManager cm) {
         // Grab LatLng object from intent extra
-        LatLng latLng = getIntent().getParcelableExtra(getString(
+        currentLocation = getIntent().getParcelableExtra(getString(
                 R.string.search_location_key));
+        // Start and bind the tweet stream service
+        startTwitterStreamService(currentLocation);
 
         // Case LatLng object returned is null (Could mean activity loaded on startup)
-        if (latLng == null) {
+        if (currentLocation == null) {
             getCurrentLocation();
         } else {
             // Move the map to the specified latitude and longitude
-            getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
+            getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_ZOOM_DISTANCE));
         }
 
         // set up broadcast receiver
@@ -108,18 +140,27 @@ public class TweetFeedActivity extends BaseMapActivity
             @Override
             public void onReceive(Context context, Intent intent) {
                 Status tweet = (Status) intent.getExtras().get("tweet");
-                TweetNode tweetNode = new TweetNode(tweet);
+                final TweetNode mNode = new TweetNode(tweet);
+                mNode.processImage(new Handler.Callback() {
+                    @Override
+                    public boolean handleMessage(Message msg) {
+                        try {
+                            tweets.add(mNode);
+                            clusterManager.addItem(mNode);
+                            clusterManager.cluster();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return false;
+                        }
+                        return true;
+                    }
+                });
                 Log.v("Received Tweet: ", tweet.toString());
-                clusterManager.addItem(tweetNode);
-                clusterManager.cluster();
+
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
 
         clusterManager = cm;
-
-        map.setOnCameraChangeListener(cm);
-        clusterManager.setOnClusterClickListener(this);
-        clusterManager.setOnClusterItemClickListener(this);
 
         try {
             lm.requestLocationUpdates(
@@ -136,7 +177,7 @@ public class TweetFeedActivity extends BaseMapActivity
      * Creates a new instance of a {@link LocationFinder} object,
      * implementing its onLocationChanged() method to guarantee
      * reception of current known location.
-     *
+     * <p>
      * Once location is received, zooms the map fragment in to
      * the received location.
      */
@@ -155,9 +196,6 @@ public class TweetFeedActivity extends BaseMapActivity
 
                 // Move the map to the specified latitude and longitude
                 getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
-
-                // Start and bind the tweet stream service
-                startTwitterStreamService(latLng);
             }
         };
     }
@@ -170,14 +208,11 @@ public class TweetFeedActivity extends BaseMapActivity
      *          The {@link LatLng} location to open the service at.
      */
     private void startTwitterStreamService(LatLng latLng) {
-        double lat = latLng.latitude;
-        double log = latLng.longitude;
-
         // Start and bind TwitterStreamService
         Intent startIntent = new Intent(this, TwitterStreamService.class);
         // put the radius and location on the intent
-        startIntent.putExtra(getString(R.string.intent_lat), lat);
-        startIntent.putExtra(getString(R.string.intent_long), log);
+        startIntent.putExtra(getString(R.string.intent_lat), latLng.latitude);
+        startIntent.putExtra(getString(R.string.intent_long), latLng.longitude);
         startService(startIntent);
     }
 
@@ -189,11 +224,26 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public boolean onClusterClick(Cluster cluster) {
         Log.d("CLUSTER_CLICK", Arrays.toString(cluster.getItems().toArray()));
+        // TweetListFragment newFragment = new TweetListFragment(new ArrayList(cluster.getItems()));
+        TweetListFragment newFragment = TweetListFragment.newInstance(1);
+        Bundle args = new Bundle();
+        ArrayList <TweetNode> clusterItems = new ArrayList<TweetNode>(cluster.getItems());
+
+        args.putParcelableArrayList("TWEETS", clusterItems);
+        newFragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.activity_tweet_feed, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+
         return true;
     }
+
     @Override
     public boolean onClusterItemClick(ClusterItem clusterItem) {
         Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
+
         return false;
     }
 
@@ -207,21 +257,41 @@ public class TweetFeedActivity extends BaseMapActivity
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     @Override
-    public void onProviderEnabled(String provider) {}
+    public void onProviderEnabled(String provider) {
+    }
 
     @Override
-    public void onProviderDisabled(String provider) {}
+    public void onProviderDisabled(String provider) {
+    }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // Unbind from the service
+        killService();
+    }
+    @Override
+    protected void onDestroy () {
+        super.onDestroy();
+        killService();
+    }
 
+    private void killService () {
         Intent stopServiceIntent = new Intent(this, TwitterStreamService.class);
         stopService(stopServiceIntent);
+    }
+
+    public boolean onOptionItemIsSelected(MenuItem item) {
+        // put code to handle actionbar items.. make sure you call super.onOptionItemSelected(item) as the default.
+
+        switch (item.getItemId()) {
+            default:
+                return false;
+        }
+
     }
 
     /**

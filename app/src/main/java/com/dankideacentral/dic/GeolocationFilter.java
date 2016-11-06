@@ -2,6 +2,8 @@ package com.dankideacentral.dic;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import twitter4j.GeoLocation;
 
 /**
@@ -43,21 +45,18 @@ public class GeolocationFilter {
     }
 
     /**
-     * Takes coordinates (X,Y) -> X is lon, Y is lat (Degrees)
      * Interprets coordinates as the center.
      *
      * Produces SW and NE coordinates to form BoundingBox
      *
-     * @param lon -> X
      * @param lat -> Y
-     * @param radius (km)
+     * @param lon -> X
+     * @param dist (km)
      * @return {String: BoundingBox}
      */
-    public static double [][] coordinatesToBoundingBox (double lon, double lat, int radius) {
-
-
+    public static double [][] createBounds (double lat, double lon, int dist) {
         double
-            dY = 360 * radius / EARTH_RADIUS,
+            dY = 360 * dist / EARTH_RADIUS,
             dX = dY * Math.cos(Math.toRadians(lat));
         double
             x1 = lon - dX,
@@ -72,6 +71,11 @@ public class GeolocationFilter {
 
         return box;
     }
+
+    public static double [][] createBounds (LatLng loc, int dist) {
+        return createBounds(loc.latitude, loc.longitude, dist);
+    }
+
     // implementation of the Haversine formula
 
     private double getDistanceFromSearchLocationToTweet(GeoLocation tweetLocation){
