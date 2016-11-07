@@ -1,0 +1,4 @@
+- Started working on custom WeightedNodeAlgo (5h)
+- Mod cluster item instance to incorp weight into scaling to determine cluster appearance. (4h)
+- FilterQuery instead of GeolocationFilter, less requests = more performant (2h)
+- Boundingbox from coordinates, generates SW and NE from center and distance ( 1h)
