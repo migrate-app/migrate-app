@@ -127,4 +127,7 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="place_autocomplete_text">Search for a place:</string>
+    <string name="nav_drawer_settings">Settings</string>
+    <string name="nav_drawer_search">Search</string>
+    <string name="nav_drawer_logout">Logout</string>
 </resources>

@@ -7,26 +7,27 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
-import android.support.design.internal.ParcelableSparseArray;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 
 import android.support.v4.app.FragmentTransaction;
 
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.model.TweetNode;
-import com.dankideacentral.dic.model.WeightedNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,16 +39,18 @@ import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.User;
 
 public class TweetFeedActivity extends BaseMapActivity
-        implements OnListFragmentInteractionListener, LocationListener {
+        implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
 
     private static final int MAP_ZOOM_DISTANCE = 12;
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
+    private static final String LOG_TAG = "TweetFeedActivity";
 
     private static final int MIN_TIME = 250; //milliseconds
     private static final int MIN_DISTANCE = 0;
@@ -58,6 +61,7 @@ public class TweetFeedActivity extends BaseMapActivity
     private TweetListFragment listFragment;
     private Fragmenter fm;
     private LocationFinder locationFinder;
+    private Twitter twitter;
 
     private ArrayList<TweetNode> tweets = new ArrayList<>();
     private Button toggleButton;
@@ -74,19 +78,21 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
+        twitter = TwitterUtil.getInstance().getTwitter();
 
-        // Set the navigation icon of the tool bar
+        // Set the navigation icon of the tool bar & its onClick listener
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
+        View navDrawer = setUpNavigationDrawer();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
 
-        // TODO: Implement toolbar's setNavigationOnClickListener method for nav drawer.
+        setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
 
         listFragment = new TweetListFragment();
 
-        fm.create(R.id.activity_tweet_feed, getFragment(), CURRENT_FRAGMENT);
+        fm.create(R.id.layout_tweet_feed, getFragment(), CURRENT_FRAGMENT);
         getFragment().getMapAsync(this);
 
         toggleButton = (Button) findViewById(R.id.toggle);
@@ -102,7 +108,7 @@ public class TweetFeedActivity extends BaseMapActivity
 //                newFragment.setArguments(args);
 //
 //                getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.activity_tweet_feed, newFragment)
+//                    .add(R.id.layout_tweet_feed, newFragment)
 //                    .addToBackStack(null)
 //                    .commit();
             }
@@ -114,13 +120,14 @@ public class TweetFeedActivity extends BaseMapActivity
         // Grab LatLng object from intent extra
         currentLocation = getIntent().getParcelableExtra(getString(
                 R.string.search_location_key));
-        // Start and bind the tweet stream service
-        startTwitterStreamService(currentLocation);
 
         // Case LatLng object returned is null (Could mean activity loaded on startup)
         if (currentLocation == null) {
             getCurrentLocation();
         } else {
+            // Start and bind the tweet stream service
+            startTwitterStreamService(currentLocation); // TODO: put back to mapReady
+
             // Move the map to the specified latitude and longitude
             getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_ZOOM_DISTANCE));
         }
@@ -163,7 +170,6 @@ public class TweetFeedActivity extends BaseMapActivity
         }
     }
 
-
     /**
      * Creates a new instance of a {@link LocationFinder} object,
      * implementing its onLocationChanged() method to guarantee
@@ -177,7 +183,7 @@ public class TweetFeedActivity extends BaseMapActivity
             @Override
             public void onLocationChanged(Location location) {
                 // Convert location to a LatLng object
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
                 // Prevent further location updates from occurring
                 locationFinder.stopLocationUpdates();
@@ -186,7 +192,10 @@ public class TweetFeedActivity extends BaseMapActivity
                 locationFinder.disconnect();
 
                 // Move the map to the specified latitude and longitude
-                getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
+                getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_ZOOM_DISTANCE));
+
+                // Start and bind the tweet stream service
+                startTwitterStreamService(currentLocation); // TODO: put back to mapReady
             }
         };
     }
@@ -195,7 +204,8 @@ public class TweetFeedActivity extends BaseMapActivity
      * Starts the twitter stream service to receive
      * tweets at the specified latitude & longitude locations.
      *
-     * @param latLng The {@link LatLng} location to open the service at.
+     * @param latLng
+     *          The {@link LatLng} location to open the service at.
      */
     private void startTwitterStreamService(LatLng latLng) {
         // Start and bind TwitterStreamService
@@ -208,7 +218,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
     @Override
     public void onListFragmentInteraction(TweetNode item) {
-        Snackbar.make(findViewById(R.id.activity_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
+        Snackbar.make(findViewById(R.id.layout_tweet_feed), item.toString(), Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -284,4 +294,96 @@ public class TweetFeedActivity extends BaseMapActivity
 
     }
 
+    /**
+     * Sets up the activity's {@link NavigationView}.
+     *
+     * Inflates its header and menu items.
+     *
+     * @return
+     *          An initialized {@link NavigationView} object.
+     */
+    private NavigationView setUpNavigationDrawer() {
+        NavigationView navDrawer = (NavigationView) findViewById(R.id.nav_drawer);
+
+        // Find Nav Drawer header views
+        View navHeader = navDrawer.getHeaderView(0);
+        TextView twitterNameText = (TextView) navHeader.findViewById(R.id.twitter_name);
+        TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
+
+        // Spawn async task to query twitter for user info and populate nav drawer header
+        new GetTwitterUserInfoTask().execute(twitterNameText, twitterHandleText);
+
+        // TODO: Inflate menu items into the navigation drawer
+
+        return navDrawer;
+    }
+
+    /**
+     * Sets the {@link Toolbar}'s navigation button onClick listener.
+     *
+     * Opens the {@link NavigationView} drawer.
+     *
+     * @param toolbar
+     *          The activity's toolbar containing the navigation button.
+     *
+     * @param drawerLayout
+     *          The reference to the activity's main layout.
+     *
+     * @param navDrawer
+     *          The {@link NavigationView} we are open on button click.
+     */
+    private void setNavigationButtonListener(Toolbar toolbar, final DrawerLayout drawerLayout,
+                                             final View navDrawer) {
+        // Set the toolbar's nav button on click listener
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // On nav button click, open the nav drawer
+                drawerLayout.openDrawer(navDrawer);
+            }
+        });
+    }
+
+    private class GetTwitterUserInfoTask extends AsyncTask<View, Long, User> {
+
+        private TextView twitterNameText;
+        private TextView twitterHandleText;
+
+        @Override
+        protected User doInBackground(View... params) {
+            User user = null;
+
+            try {
+                // Expect TextViews to be the first two params passed in
+                twitterNameText = (TextView) params[0];
+                twitterHandleText = (TextView) params[1];
+
+                // Query twitter for twitter handle (screenName) and user data
+                String screenName = twitter.getScreenName();
+                user = twitter.showUser(screenName);
+
+            } catch (TwitterException | IllegalStateException e) {
+                // Log request error to twitter
+                Log.i(LOG_TAG, "Error occurred when attempting to contact Twitter.");
+            }
+
+            return user;
+        }
+
+        @Override
+        protected void onPostExecute(User user) {
+            // If no user was found then Toast user and return
+            if (user == null) {
+                Toast.makeText(TweetFeedActivity.this.getBaseContext(), "Unable to contact Twitter.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            String twitterHandle = "@" + user.getScreenName();
+
+            // This is executed in UI thread, so set nav drawer header values to user data
+            twitterNameText.setText(user.getName());
+            twitterHandleText.setText(twitterHandle);
+        }
+    }
 }
