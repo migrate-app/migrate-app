@@ -1,0 +1,3 @@
+- Setting up of Travis CLI, fixes for deployment (4Hr)
+- Base init of TweetList and its adapter (4hr)
+- Authentication fix for deprecation (2hr)
