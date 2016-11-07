@@ -1,0 +1,4 @@
+- Custom Node Renderer (5h)
+- Async and handler approach to loading profile images from input stream (4h)
+- Node sizing and colouring (2h)
+- TweetListAdapter to handle profile images (17 minutes)
