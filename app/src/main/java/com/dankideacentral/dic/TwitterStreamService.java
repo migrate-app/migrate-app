@@ -9,38 +9,44 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
-import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
-import twitter4j.ExtendedMediaEntity;
 import twitter4j.FilterQuery;
 import twitter4j.GeoLocation;
-import twitter4j.HashtagEntity;
-import twitter4j.MediaEntity;
-import twitter4j.Place;
-import twitter4j.RateLimitStatus;
-import twitter4j.Scopes;
+import twitter4j.IDs;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
-import twitter4j.SymbolEntity;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
-import twitter4j.URLEntity;
-import twitter4j.User;
-import twitter4j.UserMentionEntity;
 import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterStreamService extends Service {
 
+    private static Set<Long> friends = new HashSet<>();
+    private static Set<Long> followers = new HashSet<>();
 
-    private TwitterStream twitterStream = null;
-    private GeolocationFilter geoFilter = null;
-    public String className = "TwitterStreamService";
+    private static Twitter twitter;
+
+    private static TwitterStream twitterStream = null;
+    private static GeolocationFilter geoFilter = null;
+    public  static String className = "TwitterStreamService";
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        // Asynchronously fetch user's friends and followers
+        twitter = TwitterUtil.getInstance().getTwitter();
+        new GetTwitterFollowers().execute();
+        new GetTwitterFriends().execute();
+
         Log.v(className, "Starting Twitter Stream");
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -71,6 +77,7 @@ public class TwitterStreamService extends Service {
         //twitterStream.sample();
         return START_NOT_STICKY;
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -84,10 +91,10 @@ public class TwitterStreamService extends Service {
         return null;
     }
 
-
     // listens to the twitter stream
     StatusListener twitterStreamListener = new StatusListener() {
         private final String TAG = "TwitterStreamListener";
+
         @Override
         public void onException(Exception ex) {
             Log.e(TAG.concat("- Exception"), ex.getMessage());
@@ -128,5 +135,81 @@ public class TwitterStreamService extends Service {
         }
     };
 
+    private class GetTwitterFollowers extends AsyncTask<Void, Void, Set<Long>> {
 
+        @Override
+        protected Set<Long> doInBackground(Void... params) {
+            Set<Long> followersSet = new HashSet<>();
+            try {
+                long userID = twitter.getId();
+                IDs ids = twitter.getFollowersIDs(userID, -1);
+                int remaining = ids.getIDs().length;
+                while(remaining > 0) {
+                    for (long id : ids.getIDs()) {
+                        followersSet.add(id);
+                    }
+                    ids = twitter.getFollowersIDs(userID, ids.getNextCursor());
+                    remaining = ids.getIDs().length;
+                }
+            } catch (TwitterException e) {
+                Log.i("TweetStreamService", "Error occurred when attempting to find user's followers. " +
+                        "It's probably because you're trying to fetch too many followers.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return followersSet;
+        }
+
+        @Override
+        protected void onPostExecute(Set<Long> followersSet) {
+            if (followersSet == null) {
+                Toast.makeText(TwitterStreamService.this.getBaseContext(),
+                        "Unable to get followers from Twitter.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(TwitterStreamService.this.getBaseContext(),
+                        "You have " + followersSet.size() + " followers you loser.",
+                        Toast.LENGTH_LONG).show();
+                followers.addAll(followersSet);
+            }
+        }
+    }
+
+    private class GetTwitterFriends extends AsyncTask<Void, Void, Set<Long>> {
+
+        @Override
+        protected Set<Long> doInBackground(Void... params) {
+            Set<Long> friendsSet = new HashSet<>();
+            try {
+                long userID = twitter.getId();
+                IDs ids = twitter.getFriendsIDs(userID, -1);
+                int remaining = ids.getIDs().length;
+                while(remaining > 0) {
+                    for (long id : ids.getIDs()) {
+                        friendsSet.add(id);
+                    }
+                    ids = twitter.getFriendsIDs(userID, ids.getNextCursor());
+                    remaining = ids.getIDs().length;
+                }
+            } catch (TwitterException e) {
+                Log.i("TweetStreamService", "Error occurred when attempting to find user's friends." +
+                        "It's probably because you're trying to fetch too many friends.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return friendsSet;
+        }
+
+        @Override
+        protected void onPostExecute(Set<Long> friendsSet) {
+            if (friendsSet == null) {
+                Toast.makeText(TwitterStreamService.this.getBaseContext(),
+                        "Unable to get followers from Twitter.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(TwitterStreamService.this.getBaseContext(),
+                        "You have " + friendsSet.size() + " friends you loser.",
+                        Toast.LENGTH_LONG).show();
+                friends.addAll(friendsSet);
+            }
+        }
+    }
 }
