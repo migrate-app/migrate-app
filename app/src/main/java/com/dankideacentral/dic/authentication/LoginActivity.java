@@ -26,10 +26,6 @@ public class LoginActivity extends AppCompatActivity {
 
         initializeLoginButton();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-        // Automatically login users that are already authenticated
-        // TODO: Add logic to automatically log in authenticated users.
-        // this is implemented in the LauncherActivity
     }
 
     /* Attach a click listener to the login button which starts the authentication process */

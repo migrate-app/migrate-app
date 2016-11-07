@@ -11,8 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
-import android.support.design.internal.ParcelableSparseArray;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 
@@ -30,7 +28,6 @@ import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.model.TweetNode;
-import com.dankideacentral.dic.model.WeightedNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,8 +39,6 @@ import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -55,6 +50,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
     private static final int MAP_ZOOM_DISTANCE = 12;
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
+    private static final String LOG_TAG = "TweetFeedActivity";
 
     private static final int MIN_TIME = 250; //milliseconds
     private static final int MIN_DISTANCE = 0;
@@ -124,8 +120,6 @@ public class TweetFeedActivity extends BaseMapActivity
         // Grab LatLng object from intent extra
         currentLocation = getIntent().getParcelableExtra(getString(
                 R.string.search_location_key));
-        // Start and bind the tweet stream service
-        startTwitterStreamService(currentLocation);
 
         // Case LatLng object returned is null (Could mean activity loaded on startup)
         if (currentLocation == null) {
@@ -186,7 +180,7 @@ public class TweetFeedActivity extends BaseMapActivity
             @Override
             public void onLocationChanged(Location location) {
                 // Convert location to a LatLng object
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
                 // Prevent further location updates from occurring
                 locationFinder.stopLocationUpdates();
@@ -195,7 +189,10 @@ public class TweetFeedActivity extends BaseMapActivity
                 locationFinder.disconnect();
 
                 // Move the map to the specified latitude and longitude
-                getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_ZOOM_DISTANCE));
+                getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_ZOOM_DISTANCE));
+
+                // Start and bind the tweet stream service
+                startTwitterStreamService(currentLocation); // TODO: put back to mapReady
             }
         };
     }
@@ -305,8 +302,8 @@ public class TweetFeedActivity extends BaseMapActivity
     private NavigationView setUpNavigationDrawer() {
         NavigationView navDrawer = (NavigationView) findViewById(R.id.nav_drawer);
 
-        // Inflate header & find its views
-        View navHeader = navDrawer.inflateHeaderView(R.layout.header_nav_drawer);
+        // Find Nav Drawer header views
+        View navHeader = navDrawer.getHeaderView(0);
         TextView twitterNameText = (TextView) navHeader.findViewById(R.id.twitter_name);
         TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
 
@@ -363,9 +360,8 @@ public class TweetFeedActivity extends BaseMapActivity
                 user = twitter.showUser(screenName);
 
             } catch (TwitterException | IllegalStateException e) {
-                // On request error to twitter, toast user
-                Toast.makeText(TweetFeedActivity.this.getBaseContext(), "Unable to contact Twitter.",
-                        Toast.LENGTH_LONG).show();
+                // Log request error to twitter
+                Log.i(LOG_TAG, "Error occurred when attempting to contact Twitter.");
             }
 
             return user;
@@ -373,12 +369,18 @@ public class TweetFeedActivity extends BaseMapActivity
 
         @Override
         protected void onPostExecute(User user) {
-            // If no user was found then do nothing
-            if (user == null) return;
+            // If no user was found then Toast user and return
+            if (user == null) {
+                Toast.makeText(TweetFeedActivity.this.getBaseContext(), "Unable to contact Twitter.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            String twitterHandle = "@" + user.getScreenName();
 
             // This is executed in UI thread, so set nav drawer header values to user data
             twitterNameText.setText(user.getName());
-            twitterHandleText.setText(user.getScreenName());
+            twitterHandleText.setText(twitterHandle);
         }
     }
 }

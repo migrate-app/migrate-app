@@ -28,6 +28,10 @@ public final class TwitterUtil {
         String twitterAuthTokenSecret = preferences.getString(
                 applicationContext.getString(R.string.twitter_auth_secret_preference), null);
 
+        // Create AccessToken to give to the twitterFactory
+        AccessToken accessToken = new AccessToken(applicationContext.getString(R.string.twitter_access_key),
+                applicationContext.getString(R.string.twitter_access_secret));
+
         // Create twitter authentication configuration
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.setDebugEnabled(true)
@@ -37,7 +41,7 @@ public final class TwitterUtil {
                 .setOAuthAccessTokenSecret(twitterAuthTokenSecret);
 
         twitterFactory = new TwitterFactory(configurationBuilder.build());
-        twitter = twitterFactory.getInstance();
+        twitter = twitterFactory.getInstance(accessToken);
     }
 
     /* Making the constructor private disallows the creation of TwitterUtil objects,
