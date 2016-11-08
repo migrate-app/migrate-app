@@ -1,5 +1,8 @@
 package com.dankideacentral.dic;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +21,7 @@ import android.support.v4.app.FragmentTransaction;
 
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -39,7 +43,10 @@ import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+import twitter4j.IDs;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -63,8 +70,13 @@ public class TweetFeedActivity extends BaseMapActivity
     private LocationFinder locationFinder;
     private Twitter twitter;
 
+    private Set<Long> friends = new HashSet<>();
+    private Set<Long> followers = new HashSet<>();
+
     private ArrayList<TweetNode> tweets = new ArrayList<>();
     private Button toggleButton;
+
+    private static int notificationId = 0;
 
     @Override
     public void onStart () {
@@ -81,6 +93,10 @@ public class TweetFeedActivity extends BaseMapActivity
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
         twitter = TwitterUtil.getInstance().getTwitter();
+
+        // Asynchronously fetch the user's friends and followers
+        new FetchTwitterFriends().execute();
+        new FetchTwitterFollowers().execute();
 
         // Set the navigation icon of the tool bar & its onClick listener
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
@@ -154,6 +170,16 @@ public class TweetFeedActivity extends BaseMapActivity
                 });
                 Log.v("Received Tweet: ", tweet.toString());
 
+                // Send notification if tweeted by a friend or follower
+                String tweetUserName = tweet.getUser().getName();
+                long tweetUserId = tweet.getUser().getId();
+                if(friends.contains(tweetUserId)) {
+                    sendNotification("Your friend " + tweetUserName + " tweeted near you!");
+                } else if(followers.contains(tweetUserId)) {
+                    sendNotification("Your follower " + tweetUserName + " tweeted near you!");
+                } else if(tweet.getUser().getFollowersCount() > 1000) { // For testing purposes
+                    sendNotification("Celebrity Tweeter " + tweetUserName + "tweeted near you!");
+                }
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
 
@@ -168,6 +194,39 @@ public class TweetFeedActivity extends BaseMapActivity
         } catch (SecurityException e) {
             Toast.makeText(this, "Location services turned off.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void sendNotification(String message) {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_cloud_white_24dp)
+                        .setContentTitle("Migrate")
+                        .setContentText(message);
+
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, TweetFeedActivity.class);
+
+        // The stack builder object will contain an artificial back stack for the started Activity.
+        // This ensures that navigating backward from the Activity leads out of application to the
+        // Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(TweetFeedActivity.class);
+
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Give the notification a unique ID so that it can be updated later
+        mNotificationManager.notify(notificationId++, mBuilder.build());
     }
 
     /**
@@ -384,6 +443,84 @@ public class TweetFeedActivity extends BaseMapActivity
             // This is executed in UI thread, so set nav drawer header values to user data
             twitterNameText.setText(user.getName());
             twitterHandleText.setText(twitterHandle);
+        }
+    }
+
+    private class FetchTwitterFriends extends AsyncTask<Void, Void, Set<Long>> {
+
+        @Override
+        protected Set<Long> doInBackground(Void... params) {
+            Set<Long> friendsSet = new HashSet<>();
+            try {
+                long userID = twitter.getId();
+                IDs ids = twitter.getFriendsIDs(userID, -1);
+                int remaining = ids.getIDs().length;
+                while(remaining > 0) {
+                    for (long id : ids.getIDs()) {
+                        friendsSet.add(id);
+                    }
+                    ids = twitter.getFriendsIDs(userID, ids.getNextCursor());
+                    remaining = ids.getIDs().length;
+                }
+            } catch (TwitterException e) {
+                Log.i("TweetStreamService", "Error occurred when attempting to find user's friends." +
+                        "It's probably because you're trying to fetch too many friends.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return friendsSet;
+        }
+
+        @Override
+        protected void onPostExecute(Set<Long> friendsSet) {
+            if (friendsSet == null) {
+                Toast.makeText(TweetFeedActivity.this.getBaseContext(),
+                        "Unable to get followers from Twitter.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(TweetFeedActivity.this.getBaseContext(),
+                        "You have " + friendsSet.size() + " friends you loser.",
+                        Toast.LENGTH_LONG).show();
+                friends.addAll(friendsSet);
+            }
+        }
+    }
+
+    private class FetchTwitterFollowers extends AsyncTask<Void, Void, Set<Long>> {
+
+        @Override
+        protected Set<Long> doInBackground(Void... params) {
+            Set<Long> followersSet = new HashSet<>();
+            try {
+                long userID = twitter.getId();
+                IDs ids = twitter.getFollowersIDs(userID, -1);
+                int remaining = ids.getIDs().length;
+                while(remaining > 0) {
+                    for (long id : ids.getIDs()) {
+                        followersSet.add(id);
+                    }
+                    ids = twitter.getFollowersIDs(userID, ids.getNextCursor());
+                    remaining = ids.getIDs().length;
+                }
+            } catch (TwitterException e) {
+                Log.i("TweetStreamService", "Error occurred when attempting to find user's followers. " +
+                        "It's probably because you're trying to fetch too many followers.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return followersSet;
+        }
+
+        @Override
+        protected void onPostExecute(Set<Long> followersSet) {
+            if (followersSet == null) {
+                Toast.makeText(TweetFeedActivity.this.getBaseContext(),
+                        "Unable to get followers from Twitter.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(TweetFeedActivity.this.getBaseContext(),
+                        "You have " + followersSet.size() + " followers you loser.",
+                        Toast.LENGTH_LONG).show();
+                followers.addAll(followersSet);
+            }
         }
     }
 }
