@@ -45,7 +45,7 @@ public final class TwitterUtil {
     }
 
     /* Making the constructor private disallows the creation of TwitterUtil objects,
-     * which is required to stay in line with the Singleton design pattern (???) */
+     * which is required to stay in line with the Singleton design pattern */
     private TwitterUtil() {}
 
     public RequestToken getRequestToken(String twitterCallbackURL) {
