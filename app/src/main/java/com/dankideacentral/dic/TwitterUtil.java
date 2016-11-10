@@ -1,8 +1,6 @@
 package com.dankideacentral.dic;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -20,28 +18,14 @@ public final class TwitterUtil {
     private static TwitterUtil instance = new TwitterUtil();
 
     public static void init(Context applicationContext) {
-        // Get twitter auth token & secret from shared preferences
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
-
-        String twitterAuthToken = preferences.getString(
-                applicationContext.getString(R.string.twitter_auth_preference), null);
-        String twitterAuthTokenSecret = preferences.getString(
-                applicationContext.getString(R.string.twitter_auth_secret_preference), null);
-
-        // Create AccessToken to give to the twitterFactory
-        AccessToken accessToken = new AccessToken(applicationContext.getString(R.string.twitter_access_key),
-                applicationContext.getString(R.string.twitter_access_secret));
-
         // Create twitter authentication configuration
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.setDebugEnabled(true)
                 .setOAuthConsumerKey(applicationContext.getString(R.string.twitter_consumer_key))
-                .setOAuthConsumerSecret(applicationContext.getString(R.string.twitter_consumer_secret))
-                .setOAuthAccessToken(twitterAuthToken)
-                .setOAuthAccessTokenSecret(twitterAuthTokenSecret);
+                .setOAuthConsumerSecret(applicationContext.getString(R.string.twitter_consumer_secret));
 
         twitterFactory = new TwitterFactory(configurationBuilder.build());
-        twitter = twitterFactory.getInstance(accessToken);
+        twitter = twitterFactory.getInstance();
     }
 
     /* Making the constructor private disallows the creation of TwitterUtil objects,
@@ -71,7 +55,7 @@ public final class TwitterUtil {
         return twitterFactory;
     }
 
-    public void setTwitterFactory(AccessToken accessToken) {
+    public void setTwitterAccessToken(AccessToken accessToken) {
         twitter = twitterFactory.getInstance(accessToken);
     }
 

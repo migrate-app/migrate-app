@@ -142,7 +142,7 @@ public class TweetFeedActivity extends BaseMapActivity
             getCurrentLocation();
         } else {
             // Start and bind the tweet stream service
-            startTwitterStreamService(currentLocation); // TODO: put back to mapReady
+            startTwitterStreamService(currentLocation);
 
             // Move the map to the specified latitude and longitude
             getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_ZOOM_DISTANCE));

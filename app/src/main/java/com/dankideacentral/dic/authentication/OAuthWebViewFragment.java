@@ -7,12 +7,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.dankideacentral.dic.TweetFeedActivity;
+import com.dankideacentral.dic.SearchActivity;
 import com.dankideacentral.dic.R;
 
 public class OAuthWebViewFragment extends Fragment {
@@ -28,10 +27,16 @@ public class OAuthWebViewFragment extends Fragment {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("oauth_verifier=")) {
-                    Intent intent = new Intent(getActivity().getApplicationContext(), TweetFeedActivity.class);
-                    intent.setData(Uri.parse(url));
+                    // Create user session
+                    TwitterSession.getInstance().createSession(Uri.parse(url),
+                            getActivity().getApplicationContext());
+
+                    // TODO: add logic to check location enabled
+                    Intent intent = new Intent(getActivity().getApplicationContext(),
+                            SearchActivity.class);
                     startActivity(intent);
                 }
+
                 view.loadUrl(url);
                 return true;
             }
