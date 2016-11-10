@@ -7,6 +7,9 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import com.dankideacentral.dic.authentication.LoginActivity;
+import com.dankideacentral.dic.authentication.TwitterSession;
+
+import twitter4j.auth.AccessToken;
 
 public class LaunchActivity extends AppCompatActivity {
 
@@ -35,6 +38,11 @@ public class LaunchActivity extends AppCompatActivity {
             Intent loginIntent = new Intent(this, LoginActivity.class);
             startActivity(loginIntent);
         } else {
+            // Generate AccessToken from auth values stored in preferences
+            AccessToken accessToken = TwitterSession.getInstance().generateAccessToken(
+                    twitterAuth, twitterAuthSecret);
+            TwitterUtil.getInstance().setTwitterAccessToken(accessToken);
+
             if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
                 Intent mapIntent = new Intent(this, TweetFeedActivity.class);
                 startActivity(mapIntent);
