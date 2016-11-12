@@ -799,12 +799,12 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                     Log.v("Cluster - clusterSize", clusterSize + "");
 
                     Bitmap mIcon = mNode.getIcon();
-                    int mScale = Math.max(1, (int) Math.ceil(Math.log(clusterSize)));
+                    int mScale = Math.max(0, (int) Math.ceil(Math.log(clusterSize)));
                     // TODO: Implement proper scaling and colouring of nodes.
                     mIcon = Bitmap.createScaledBitmap(mIcon, mIcon.getWidth() + mScale, mIcon.getHeight() + mScale, true);
 
 
-                    mIcon = cfilter(mIcon, mScale % 255, 255, 255);
+                    // mIcon = cfilter(mIcon, mScale % 255, 255, 255);
 
                     BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mIcon);
 
