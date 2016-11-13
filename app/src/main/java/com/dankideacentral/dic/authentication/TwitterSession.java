@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -22,7 +24,7 @@ import twitter4j.auth.RequestToken;
  *          don't occur.
  *
  * @author Chris Ermel
- * @version 1.0
+ * @version 1.1
  * @since 2016-11-9
  */
 public class TwitterSession {
@@ -85,14 +87,19 @@ public class TwitterSession {
     }
 
     /**
-     * Sets the singleton's {@link RequestToken}.
+     * Destroy's all data representative of the authenticated
+     * User's session. Removes tokens stored in shared preferences,
+     * and clears the Singleton's {@link AccessToken} and
+     * {@link RequestToken}.
      *
-     * @param newRequestToken
-     *          The new {@link RequestToken} to give the
-     *          {@link TwitterSession}.
+     * @param applicationContext
+     *          The context from which the shared preferences
+     *          will be called.
      */
-    public void setRequestToken(final RequestToken newRequestToken) {
-        requestToken = newRequestToken;
+    public void destroySession(final Context applicationContext) {
+        modifyTokensInSharedPreferences(applicationContext, null, null);
+        setAccessToken(null);
+        setRequestToken(null);
     }
 
     /**
@@ -129,11 +136,24 @@ public class TwitterSession {
      * @param uri
      *          The {@link Uri} containing the oauth_verifier.
      */
-    void createSession(final Uri uri, final Context applicationContext) {
+    void createSession(final Uri uri, final Context applicationContext,
+                       final Handler.Callback callback) {
+        assert callback != null;
         String authVerifier = getOAuthVerifierFromUri(uri);
 
         // Start asynchronous task to request user accessToken from twitter
-        new GetTwitterAccessTokenTask(applicationContext).execute(authVerifier);
+        new GetTwitterAccessTokenTask(applicationContext, callback).execute(authVerifier);
+    }
+
+    /**
+     * Sets the singleton's {@link RequestToken}.
+     *
+     * @param newRequestToken
+     *          The new {@link RequestToken} to give the
+     *          {@link TwitterSession}.
+     */
+    void setRequestToken(final RequestToken newRequestToken) {
+        requestToken = newRequestToken;
     }
 
     /**
@@ -147,16 +167,49 @@ public class TwitterSession {
     }
 
     /**
+     * Sets the access Token and Token Secret in the shared
+     * preferences to whichever values are passed to this method.
+     *
+     * @param applicationContext
+     *          The context from which shared preferences are being
+     *          called.
+     *
+     * @param token
+     *          String representing the user's access token.
+     *
+     * @param tokenSecret
+     *          String representing the user's access token secret.
+     */
+    private void modifyTokensInSharedPreferences(final Context applicationContext,
+                                                 final String token,
+                                                 final String tokenSecret) {
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                applicationContext);
+        SharedPreferences.Editor prefEditor = preferences.edit();
+
+        prefEditor.putString(applicationContext.getString(
+                R.string.twitter_auth_preference), token);
+        prefEditor.putString(applicationContext.getString(
+                R.string.twitter_auth_secret_preference), tokenSecret);
+
+        prefEditor.apply();
+    }
+
+    /**
      * Asynchronous task to request a valid user {@link AccessToken}
      * token from Twitter using an oauth_verifier.
      */
     private class GetTwitterAccessTokenTask extends AsyncTask<String, Long, AccessToken> {
 
         private Context applicationContext;
+        private Handler.Callback callback;
 
-        GetTwitterAccessTokenTask(Context applicationContext) {
+        GetTwitterAccessTokenTask(final Context applicationContext,
+                                  final Handler.Callback callback) {
             super();
             this.applicationContext = applicationContext;
+            this.callback = callback;
         }
 
         @Override
@@ -186,19 +239,14 @@ public class TwitterSession {
 
             // Store accessToken in Singleton & in SharedPreferences
             TwitterSession.getInstance().setAccessToken(accessToken);
-
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
-            SharedPreferences.Editor prefEditor = preferences.edit();
-
-            prefEditor.putString(applicationContext.getString(
-                    R.string.twitter_auth_preference), accessToken.getToken());
-            prefEditor.putString(applicationContext.getString(
-                    R.string.twitter_auth_secret_preference), accessToken.getTokenSecret());
+            modifyTokensInSharedPreferences(applicationContext,
+                    accessToken.getToken(), accessToken.getTokenSecret());
 
             // Reinitialize the Twitter Util to contain AccessToken
             TwitterUtil.getInstance().setTwitterAccessToken(accessToken);
 
-            prefEditor.apply();
+            // Fire callback to indicate end of query to Twitter
+            new Handler(callback).sendMessage(new Message());
         }
     }
 }
