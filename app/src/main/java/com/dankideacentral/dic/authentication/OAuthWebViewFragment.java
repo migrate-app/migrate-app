@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,21 +35,22 @@ public class OAuthWebViewFragment extends Fragment {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("oauth_verifier=")) {
-                    Intent intent;
 
                     // Create user session
                     TwitterSession.getInstance().createSession(Uri.parse(url),
-                            getActivity().getApplicationContext());
-
-                    if (isLocationEnabled() == PackageManager.PERMISSION_GRANTED) {
-                        intent = new Intent(getActivity().getApplicationContext(),
-                                TweetFeedActivity.class);
-                    } else {
-                        intent = new Intent(getActivity().getApplicationContext(),
-                                SearchActivity.class);
-                    }
-
-                    startActivity(intent);
+                            getActivity().getApplicationContext(),
+                            new Handler.Callback() {
+                                @Override
+                                public boolean handleMessage(Message msg) {
+                                    try {
+                                        redirectToNewActivity();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                            });
                 }
 
                 view.loadUrl(url);
@@ -78,5 +81,24 @@ public class OAuthWebViewFragment extends Fragment {
     private int isLocationEnabled() {
         return getActivity().getPackageManager().checkPermission(
                 FINE_LOCATION_PERMISSION, getActivity().getPackageName());
+    }
+
+    /**
+     * Redirects to the {@link TweetFeedActivity} if
+     * location services are enabled. Otherwise, redirects
+     * to the {@link SearchActivity}.
+     */
+    private void redirectToNewActivity() {
+        Intent intent;
+
+        if (isLocationEnabled() == PackageManager.PERMISSION_GRANTED) {
+            intent = new Intent(getActivity().getApplicationContext(),
+                    TweetFeedActivity.class);
+        } else {
+            intent = new Intent(getActivity().getApplicationContext(),
+                    SearchActivity.class);
+        }
+
+        startActivity(intent);
     }
 }

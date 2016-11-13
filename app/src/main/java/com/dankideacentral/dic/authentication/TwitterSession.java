@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -129,11 +131,13 @@ public class TwitterSession {
      * @param uri
      *          The {@link Uri} containing the oauth_verifier.
      */
-    void createSession(final Uri uri, final Context applicationContext) {
+    void createSession(final Uri uri, final Context applicationContext,
+                       final Handler.Callback callback) {
+        assert callback != null;
         String authVerifier = getOAuthVerifierFromUri(uri);
 
         // Start asynchronous task to request user accessToken from twitter
-        new GetTwitterAccessTokenTask(applicationContext).execute(authVerifier);
+        new GetTwitterAccessTokenTask(applicationContext, callback).execute(authVerifier);
     }
 
     /**
@@ -153,10 +157,13 @@ public class TwitterSession {
     private class GetTwitterAccessTokenTask extends AsyncTask<String, Long, AccessToken> {
 
         private Context applicationContext;
+        private Handler.Callback callback;
 
-        GetTwitterAccessTokenTask(Context applicationContext) {
+        GetTwitterAccessTokenTask(final Context applicationContext,
+                                  final Handler.Callback callback) {
             super();
             this.applicationContext = applicationContext;
+            this.callback = callback;
         }
 
         @Override
@@ -199,6 +206,9 @@ public class TwitterSession {
             TwitterUtil.getInstance().setTwitterAccessToken(accessToken);
 
             prefEditor.apply();
+
+            // Fire callback to indicate end of query to Twitter
+            new Handler(callback).sendMessage(new Message());
         }
     }
 }
