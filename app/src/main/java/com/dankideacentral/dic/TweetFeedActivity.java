@@ -32,6 +32,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
+import com.dankideacentral.dic.authentication.LoginActivity;
+import com.dankideacentral.dic.authentication.TwitterSession;
 import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.dankideacentral.dic.util.LocationFinder;
@@ -405,6 +407,7 @@ public class TweetFeedActivity extends BaseMapActivity
                     public boolean onMenuItemClick(MenuItem item) {
                         startActivity(new Intent(TweetFeedActivity.this, SettingsActivity.class));
                         drawerLayout.closeDrawer(navDrawer);
+
                         return true;
                     }
                 }
@@ -417,6 +420,25 @@ public class TweetFeedActivity extends BaseMapActivity
                     public boolean onMenuItemClick(MenuItem item) {
                         startActivity(new Intent(TweetFeedActivity.this, SearchActivity.class));
                         drawerLayout.closeDrawer(navDrawer);
+
+                        return true;
+                    }
+                }
+        );
+
+        // Logout menu onClick listener
+        navMenu.findItem(R.id.nav_logout).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        // Clear relevant user auth data & reset Twitter accessToken
+                        TwitterSession.getInstance().destroySession(TweetFeedActivity.this);
+                        TwitterUtil.getInstance().setTwitterAccessToken(null);
+                        TwitterUtil.getInstance().clearTwitterRequestToken();
+
+                        startActivity(new Intent(TweetFeedActivity.this, LoginActivity.class));
+                        drawerLayout.closeDrawer(navDrawer);
+
                         return true;
                     }
                 }

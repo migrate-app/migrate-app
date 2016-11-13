@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -28,6 +29,7 @@ public class OAuthWebViewFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         String auth = getArguments().getString(getString(R.string.string_extra_authentication_url));
+        final CookieManager cookieManager = CookieManager.getInstance();
 
         webView.loadUrl(auth);
         webView.setWebViewClient(new WebViewClient()
@@ -44,6 +46,7 @@ public class OAuthWebViewFragment extends Fragment {
                                 public boolean handleMessage(Message msg) {
                                     try {
                                         redirectToNewActivity();
+                                        cookieManager.removeAllCookies(null);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                         return false;

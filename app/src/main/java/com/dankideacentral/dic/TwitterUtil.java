@@ -55,8 +55,28 @@ public final class TwitterUtil {
         return twitterFactory;
     }
 
+    /**
+     * Sets {@link Twitter}'s {@link AccessToken}.
+     * If the token is null, reinitializes Twitter without
+     * an AccessToken.
+     *
+     * @param accessToken
+     *          The User's {@link AccessToken} we are giving
+     *          to the {@link Twitter} object.
+     */
     public void setTwitterAccessToken(AccessToken accessToken) {
-        twitter = twitterFactory.getInstance(accessToken);
+        if (accessToken == null) {
+            twitter = twitterFactory.getInstance();
+        } else {
+            twitter = twitterFactory.getInstance(accessToken);
+        }
+    }
+
+    /**
+     * Clears the Singleton's current {@link RequestToken}.
+     */
+    public void clearTwitterRequestToken() {
+        requestToken = null;
     }
 
     public Twitter getTwitter() {
