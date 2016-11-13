@@ -24,6 +24,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -100,7 +101,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
         // Set the navigation icon of the tool bar & its onClick listener
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
-        View navDrawer = setUpNavigationDrawer();
+        View navDrawer = setUpNavigationDrawer(drawerLayout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
 
@@ -358,10 +359,13 @@ public class TweetFeedActivity extends BaseMapActivity
      *
      * Inflates its header and menu items.
      *
+     * @param drawerLayout
+     *          The drawer layout containing the {@link NavigationView}.
+     *
      * @return
      *          An initialized {@link NavigationView} object.
      */
-    private NavigationView setUpNavigationDrawer() {
+    private NavigationView setUpNavigationDrawer(final DrawerLayout drawerLayout) {
         NavigationView navDrawer = (NavigationView) findViewById(R.id.nav_drawer);
 
         // Find Nav Drawer header views
@@ -369,12 +373,54 @@ public class TweetFeedActivity extends BaseMapActivity
         TextView twitterNameText = (TextView) navHeader.findViewById(R.id.twitter_name);
         TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
 
+        // Set up navDrawer menu onClick listeners
+        setNavigationMenuItemClickListeners(navDrawer, drawerLayout);
+
         // Spawn async task to query twitter for user info and populate nav drawer header
         new GetTwitterUserInfoTask().execute(twitterNameText, twitterHandleText);
 
-        // TODO: Inflate menu items into the navigation drawer
-
         return navDrawer;
+    }
+
+    /**
+     * Sets the click listeners for each of the
+     * {@link NavigationView}'s menu items.
+     *
+     * @param navDrawer
+     *          The {@link NavigationView} containing
+     *          the menu items.
+     *
+     * @param drawerLayout
+     *          The {@link DrawerLayout} containing
+     *          the {@link NavigationView}.
+     */
+    private void setNavigationMenuItemClickListeners(final NavigationView navDrawer,
+                                                     final DrawerLayout drawerLayout) {
+        Menu navMenu = navDrawer.getMenu();
+
+        // Settings menu onClick listener
+        navMenu.findItem(R.id.nav_settings).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        startActivity(new Intent(TweetFeedActivity.this, SettingsActivity.class));
+                        drawerLayout.closeDrawer(navDrawer);
+                        return true;
+                    }
+                }
+        );
+
+        // Search menu onClick listener
+        navMenu.findItem(R.id.nav_search).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        startActivity(new Intent(TweetFeedActivity.this, SearchActivity.class));
+                        drawerLayout.closeDrawer(navDrawer);
+                        return true;
+                    }
+                }
+        );
     }
 
     /**
@@ -403,6 +449,10 @@ public class TweetFeedActivity extends BaseMapActivity
         });
     }
 
+    /**
+     * Asynchronous task to query twitter for the {@link User}'s
+     * information to populate the nav drawer with.
+     */
     private class GetTwitterUserInfoTask extends AsyncTask<View, Long, User> {
 
         private TextView twitterNameText;
