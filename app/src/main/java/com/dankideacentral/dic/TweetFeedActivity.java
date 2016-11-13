@@ -53,7 +53,7 @@ import twitter4j.TwitterException;
 import twitter4j.User;
 
 public class TweetFeedActivity extends BaseMapActivity
-        implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener, LocationListener {
+        implements OnListFragmentInteractionListener, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener {
 
     private static final int MAP_ZOOM_DISTANCE = 12;
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
@@ -81,8 +81,10 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public void onStart () {
         super.onStart();
+        Log.v(getClass().getName(), "onStart");
+
         if (currentLocation != null) {
-            Log.v(getClass().getName(), "onStart - Rebooting Service with saved current loc");
+            Log.v(getClass().getName(), "onStart - Booting w/ current loc");
             startTwitterStreamService(currentLocation);
         }
     }
@@ -90,6 +92,7 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_tweet_feed);
         fm = new Fragmenter(getSupportFragmentManager());
         twitter = TwitterUtil.getInstance().getTwitter();
@@ -177,23 +180,13 @@ public class TweetFeedActivity extends BaseMapActivity
                     sendNotification("Your friend " + tweetUserName + " tweeted near you!");
                 } else if(followers.contains(tweetUserId)) {
                     sendNotification("Your follower " + tweetUserName + " tweeted near you!");
-                } else if(tweet.getUser().getFollowersCount() > 1000) { // For testing purposes
+                } else if(tweet.getUser().isVerified()) { // For testing purposes
                     sendNotification("Celebrity Tweeter " + tweetUserName + "tweeted near you!");
                 }
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
 
         clusterManager = cm;
-
-        try {
-            lm.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    MIN_TIME,
-                    MIN_DISTANCE,
-                    this);
-        } catch (SecurityException e) {
-            Toast.makeText(this, "Location services turned off.", Toast.LENGTH_LONG).show();
-        }
     }
 
     private void sendNotification(String message) {
@@ -249,7 +242,6 @@ public class TweetFeedActivity extends BaseMapActivity
 
                 // Disconnect from the googleApiClient
                 locationFinder.disconnect();
-
                 // Move the map to the specified latitude and longitude
                 getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_ZOOM_DISTANCE));
 
@@ -302,29 +294,19 @@ public class TweetFeedActivity extends BaseMapActivity
     @Override
     public boolean onClusterItemClick(ClusterItem clusterItem) {
         Log.d("CLUSTER_ITEM_CLICK", clusterItem.getPosition().toString());
+        TweetListFragment newFragment = TweetListFragment.newInstance(1);
+        Bundle args = new Bundle();
+        ArrayList <TweetNode> clusterItems = new ArrayList<TweetNode>();
+        clusterItems.add((TweetNode) clusterItem);
+        args.putParcelableArrayList("TWEETS", clusterItems);
+        newFragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.activity_tweet_feed, newFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
 
         return false;
-    }
-
-    @Override
-    public void onLocationChanged(Location loc) {
-        LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
-
-        Log.d("LOCATION_LISTENER", currentLocation.toString());
-
-        getMap().moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
     }
 
     @Override
@@ -423,6 +405,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
             } catch (TwitterException | IllegalStateException e) {
                 // Log request error to twitter
+                e.printStackTrace();
                 Log.i(LOG_TAG, "Error occurred when attempting to contact Twitter.");
             }
 
