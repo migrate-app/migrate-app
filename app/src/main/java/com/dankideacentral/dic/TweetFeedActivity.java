@@ -7,8 +7,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import com.dankideacentral.dic.authentication.LoginActivity;
 import com.dankideacentral.dic.authentication.TwitterSession;
 import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.util.Fragmenter;
+import com.dankideacentral.dic.util.ImageProcessor;
 import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -356,7 +358,6 @@ public class TweetFeedActivity extends BaseMapActivity
         View navHeader = navDrawer.getHeaderView(0);
         TextView twitterNameText = (TextView) navHeader.findViewById(R.id.twitter_name);
         TextView twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
-
         // Set up navDrawer menu onClick listeners
         setNavigationMenuItemClickListeners(navDrawer, drawerLayout);
 
@@ -468,13 +469,13 @@ public class TweetFeedActivity extends BaseMapActivity
 
             try {
                 // Expect TextViews to be the first two params passed in
+
                 twitterNameText = (TextView) params[0];
                 twitterHandleText = (TextView) params[1];
 
                 // Query twitter for twitter handle (screenName) and user data
                 String screenName = twitter.getScreenName();
                 user = twitter.showUser(screenName);
-
             } catch (TwitterException | IllegalStateException e) {
                 // Log request error to twitter
                 e.printStackTrace();
@@ -492,7 +493,19 @@ public class TweetFeedActivity extends BaseMapActivity
                         Toast.LENGTH_LONG).show();
                 return;
             }
+            new AsyncTask<String, Void, Bitmap> () {
+                @Override
+                protected Bitmap doInBackground(String... params) {
+                    return ImageProcessor.bitmapFromUrl(params[0]);
+                }
 
+                @Override
+                protected void onPostExecute(Bitmap mBitMap) {
+                    super.onPostExecute(mBitMap);
+                    View parent = (View) twitterNameText.getParent();
+                    parent.setBackground(new BitmapDrawable(getResources(), mBitMap));
+                }
+            }.execute(user.getProfileBackgroundImageURL());
             String twitterHandle = "@" + user.getScreenName();
 
             // This is executed in UI thread, so set nav drawer header values to user data
