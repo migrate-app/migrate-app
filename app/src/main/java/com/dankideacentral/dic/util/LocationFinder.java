@@ -26,7 +26,7 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private static final String LOG_TAG = "LOCATION_FINDER";
-
+    public static final int LOCATION_SERVICES_OFF = 0;
     private GoogleApiClient googleApiClient;
     private Context context;
 
@@ -106,15 +106,17 @@ public abstract class LocationFinder implements GoogleApiClient.ConnectionCallba
      * Starts a request for location updates from the {@link GoogleApiClient}.
      */
     private void startLocationUpdates() {
+        Log.v(getClass().getName(), "startingLocationUpdates");
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     googleApiClient, LocationRequest.create(), this);
         } catch (SecurityException e) {
             // SecurityException thrown if location permissions are disabled
             Log.d(LOG_TAG, "Location permissions deactivated when attempting to recover location.");
-
             // Toast small message to user
             Toast.makeText(context, "Location services turned off.", Toast.LENGTH_LONG).show();
+            onError(LocationFinder.LOCATION_SERVICES_OFF);
         }
     }
+    protected abstract void onError (int type);
 }

@@ -95,7 +95,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
     /**
      * If cluster size is less than this size, display individual markers.
      */
-    private int mMinClusterSize = 35;
+    private int mMinClusterSize = 20;
 
     /**
      * The currently displayed set of clusters.
@@ -801,7 +801,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                     Bitmap mIcon = mNode.getIcon();
                     int mScale = Math.max(0, (int) Math.ceil(Math.log(clusterSize)));
                     // TODO: Implement proper scaling and colouring of nodes.
-                    mIcon = Bitmap.createScaledBitmap(mIcon, mIcon.getWidth() + mScale, mIcon.getHeight() + mScale, true);
+                    mIcon = Bitmap.createScaledBitmap(mIcon, mIcon.getWidth() + 40 + mScale, mIcon.getHeight() + 40 + mScale, true);
 
 
                     // mIcon = cfilter(mIcon, mScale % 255, 255, 255);

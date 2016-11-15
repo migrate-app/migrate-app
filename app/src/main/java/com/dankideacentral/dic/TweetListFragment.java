@@ -1,5 +1,6 @@
 package com.dankideacentral.dic;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -82,18 +83,21 @@ public class TweetListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tweet_list, container, false);
-
-        final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        final Activity mActivity = getActivity();
+        final Toolbar toolbar = (Toolbar) mActivity.findViewById(R.id.toolbar);
         toolbar.hasExpandedActionView();
         // done nav separately so it appears on the far left side
+        // TODO: Case where this sets the nav icon to the arrow, when tweetlistfragment already dismissed
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toolbar.getMenu().clear();
-                getActivity().onBackPressed();
+                if (mActivity != null)
+                    mActivity.onBackPressed();
             }
         });
+        // TODO: This will inflate everytime a clusteritem or cluster is clicked
         toolbar.inflateMenu(R.menu.tweet_list_menu);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -135,15 +139,16 @@ public class TweetListFragment extends Fragment {
     }
 
     private Uri getDirectionsUri(){
-
-        double destLat  = location.latitude;
-        double destLong = location.longitude;
-        String directionsFromCurrentLocation =  "http://maps.google.com/maps?daddr= %f,%f";
-        //String directionsFromDifferentAddress = "http://maps.google.com/maps?saddr=%f,%f&daddr= %f,%f";
-        String uri = String.format(directionsFromCurrentLocation, destLat, destLong);
-        return Uri.parse(uri);
+        if (location != null) {
+            double destLat  = location.latitude;
+            double destLong = location.longitude;
+            String directionsFromCurrentLocation =  "http://maps.google.com/maps?daddr= %f,%f";
+            //String directionsFromDifferentAddress = "http://maps.google.com/maps?saddr=%f,%f&daddr= %f,%f";
+            String uri = String.format(directionsFromCurrentLocation, destLat, destLong);
+            return Uri.parse(uri);
+        }
+        return null;
     }
-
 
     @Override
     public void onAttach(Context context) {
