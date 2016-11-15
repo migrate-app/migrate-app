@@ -15,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 
@@ -108,11 +107,11 @@ public class TweetFeedActivity extends BaseMapActivity
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
 
         setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
-        getFragment().getMapAsync(this);
 
         listFragment = new TweetListFragment();
 
         fm.create(R.id.layout_tweet_feed, getFragment(), CURRENT_FRAGMENT);
+        getFragment().getMapAsync(this);
     }
 
     public void initCurrentLocation() {
@@ -256,7 +255,7 @@ public class TweetFeedActivity extends BaseMapActivity
                 Message msg = new Message();
                 Bundle args = new Bundle();
                 args.putDouble("lat", location.getLatitude());
-                args.putDouble("long", location.getLongitude());
+                args.putDouble("lon", location.getLongitude());
                 msg.setData(args);
                 new Handler(cb).sendMessage(msg);
             }

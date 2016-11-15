@@ -33,7 +33,7 @@ public abstract class BaseMapActivity extends AppCompatActivity implements
     private ClusterManager <TweetNode> mClusterManager;
     private WeightedNodeAlgorithm <TweetNode> mNodeAlgorithm;
     private WeightedNodeRenderer <TweetNode> mNodeRenderer;
-    private boolean mapReadyBeenCalled = false;
+
     public BaseMapActivity () {
         mapFragment = SupportMapFragment.newInstance();
     }
