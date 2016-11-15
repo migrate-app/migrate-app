@@ -1,9 +1,11 @@
 package com.dankideacentral.dic;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -160,6 +162,13 @@ public class SearchActivity extends AppCompatActivity {
     private void getCurrentLocation() {
         // Acquire location from the device by initializing a locationFinder object
         locationFinder = new LocationFinder(this) {
+            @Override
+            protected void onError(int type) {
+                if (type == LocationFinder.LOCATION_SERVICES_OFF) {
+                    Snackbar.make(findViewById(R.id.activity_search), "Location services are turned off.", 3);
+                }
+            }
+
             @Override
             public void onLocationChanged(Location location) {
                 // Prevent further location updates from occurring
