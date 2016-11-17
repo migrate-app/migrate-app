@@ -78,7 +78,6 @@ public class TweetFeedActivity extends BaseMapActivity
 
     private Set<Long> friends = new HashSet<>();
     private Set<Long> followers = new HashSet<>();
-
     private static int notificationId = 0;
 
     @Override
@@ -101,14 +100,10 @@ public class TweetFeedActivity extends BaseMapActivity
         new FetchTwitterFollowers().execute();
 
         // Set the navigation icon of the tool bar & its onClick listener
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
-        View navDrawer = setUpNavigationDrawer(drawerLayout);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_nav_button);
+        setToolbar();
 
-        setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
-
-        listFragment = new TweetListFragment();
+        // never used
+        //listFragment = new TweetListFragment();
 
         fm.create(R.id.layout_tweet_feed, getFragment(), CURRENT_FRAGMENT);
         getFragment().getMapAsync(this);
@@ -578,5 +573,17 @@ public class TweetFeedActivity extends BaseMapActivity
         protected void onPostExecute(Set<Long> followersSet) {
             followers.addAll(followersSet);
         }
+
     }
+
+    public void setToolbar(){
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.activity_tweet_feed);
+        View navDrawer = setUpNavigationDrawer(drawerLayout);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.getMenu().clear();
+        toolbar.setNavigationIcon(R.drawable.ic_nav_button);
+
+        setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
+    }
+
 }
