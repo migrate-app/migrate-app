@@ -20,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.dankideacentral.dic.model.TweetNode;
 import com.google.android.gms.maps.model.LatLng;
@@ -45,6 +46,7 @@ public class TweetListFragment extends Fragment {
     private MyItemRecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<TweetNode> tweetNodes = new <TweetNode> ArrayList();
     private LatLng location;
+    private Toolbar toolbar = null;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -82,10 +84,12 @@ public class TweetListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.tweet_list, container, false);
         final Activity mActivity = getActivity();
-        final Toolbar toolbar = (Toolbar) mActivity.findViewById(R.id.toolbar);
+        toolbar = (Toolbar) mActivity.findViewById(R.id.toolbar);
         toolbar.hasExpandedActionView();
+
         // done nav separately so it appears on the far left side
         // TODO: Case where this sets the nav icon to the arrow, when tweetlistfragment already dismissed
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
@@ -164,6 +168,7 @@ public class TweetListFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        ((TweetFeedActivity)getActivity()).setToolbar();
         mListener = null;
     }
 
