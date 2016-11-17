@@ -186,7 +186,7 @@ public class TweetFeedActivity extends BaseMapActivity
                 } else if(followers.contains(tweetUserId)) {
                     sendNotification("Your follower " + tweetUserName + " tweeted near you!");
                 } else if(tweet.getUser().isVerified()) { // For testing purposes
-                    sendNotification("Celebrity Tweeter " + tweetUserName + "tweeted near you!");
+                    sendNotification("Celebrity Tweeter " + tweetUserName + " tweeted near you!");
                 }
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
