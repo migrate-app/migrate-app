@@ -126,7 +126,7 @@ public class TweetListFragment extends Fragment {
                         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
                         sharingIntent.setType("text/plain");
                         String shareBody = "" + getDirectionsUri().toString();
-                        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "REACH! Found a cool event on Mirgate!");
+                        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.share_message));
                         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
                         startActivity(Intent.createChooser(sharingIntent, "Share via"));
                     default:
