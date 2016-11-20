@@ -1,4 +1,4 @@
-package com.dankideacentral.dic.authentication;
+package com.dankideacentral.dic.activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,9 +9,9 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 
-import com.dankideacentral.dic.TweetFeedActivity;
 import com.dankideacentral.dic.R;
-import com.dankideacentral.dic.TwitterUtil;
+import com.dankideacentral.dic.authentication.TwitterSession;
+import com.dankideacentral.dic.util.TwitterUtil;
 
 import twitter4j.auth.RequestToken;
 

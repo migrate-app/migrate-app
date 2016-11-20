@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.activities;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,12 +29,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
-import com.dankideacentral.dic.authentication.LoginActivity;
+import com.dankideacentral.dic.R;
+import com.dankideacentral.dic.fragments.TweetListFragment;
+import com.dankideacentral.dic.fragments.TweetListFragment.OnListFragmentInteractionListener;
+import com.dankideacentral.dic.data.TwitterStreamService;
+import com.dankideacentral.dic.util.TwitterUtil;
 import com.dankideacentral.dic.authentication.TwitterSession;
 import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.util.Fragmenter;
@@ -65,13 +67,9 @@ public class TweetFeedActivity extends BaseMapActivity
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
     private static final String LOG_TAG = "TweetFeedActivity";
 
-    private static final int MIN_TIME = 250; //milliseconds
-    private static final int MIN_DISTANCE = 0;
-
     private LatLng currentLocation;
     private ClusterManager<TweetNode> clusterManager;
 
-    private TweetListFragment listFragment;
     private Fragmenter fm;
     private LocationFinder locationFinder;
     private Twitter twitter;
@@ -101,9 +99,6 @@ public class TweetFeedActivity extends BaseMapActivity
 
         // Set the navigation icon of the tool bar & its onClick listener
         setToolbar();
-
-        // never used
-        //listFragment = new TweetListFragment();
 
         fm.create(R.id.layout_tweet_feed, getFragment(), CURRENT_FRAGMENT);
         getFragment().getMapAsync(this);
@@ -181,7 +176,7 @@ public class TweetFeedActivity extends BaseMapActivity
                 } else if(followers.contains(tweetUserId)) {
                     sendNotification("Your follower " + tweetUserName + " tweeted near you!");
                 } else if(tweet.getUser().isVerified()) { // For testing purposes
-                    sendNotification("Celebrity Tweeter " + tweetUserName + "tweeted near you!");
+                    sendNotification("Celebrity Tweeter " + tweetUserName + " tweeted near you!");
                 }
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
@@ -504,7 +499,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
                     navHeader.setBackground(new BitmapDrawable(getResources(), mBitMap));
                 }
-            }.execute(user.getProfileBackgroundImageURL());
+            }.execute(user.getProfileBannerURL());
             String twitterHandle = "@" + user.getScreenName();
 
             // This is executed in UI thread, so set nav drawer header values to user data

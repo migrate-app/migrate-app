@@ -32,20 +32,20 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".TweetFeedActivity"
+            android:name=".activities.TweetFeedActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="com.dankideacentral.dic.TWEET_BROADCAST" />
             </intent-filter>
         </activity>
-        <activity android:name=".SearchActivity" />
+        <activity android:name=".activities.SearchActivity" />
 
         <!--
          This Activity has no UI. Its the first activity to launch and routes to the correct
         activity, then is cleared from the task stack
         -->
         <activity
-            android:name=".LaunchActivity"
+            android:name=".activities.LaunchActivity"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,16 +55,16 @@
         </activity>
 
         <!-- Authentication activities -->
-        <activity android:name=".authentication.LoginActivity" />
-        <activity android:name=".authentication.OAuthActivity" />
+        <activity android:name=".activities.LoginActivity" />
+        <activity android:name=".activities.OAuthActivity" />
 
         <service
-            android:name=".TwitterStreamService"
+            android:name=".data.TwitterStreamService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings" />
     </application>
 

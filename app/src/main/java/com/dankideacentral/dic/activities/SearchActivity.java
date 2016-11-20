@@ -1,6 +1,5 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -16,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.dankideacentral.dic.R;
 import com.dankideacentral.dic.util.LocationFinder;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;

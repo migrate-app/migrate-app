@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.util;
 
 import android.util.Log;
 

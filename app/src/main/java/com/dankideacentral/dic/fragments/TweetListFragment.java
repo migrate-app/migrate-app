@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -6,29 +6,23 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
+import com.dankideacentral.dic.view.DividerItemDecoration;
+import com.dankideacentral.dic.R;
+import com.dankideacentral.dic.activities.TweetFeedActivity;
+import com.dankideacentral.dic.adapters.MyItemRecyclerViewAdapter;
 import com.dankideacentral.dic.model.TweetNode;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-
-import twitter4j.GeoLocation;
 
 /**
  * A fragment representing a list of Items.

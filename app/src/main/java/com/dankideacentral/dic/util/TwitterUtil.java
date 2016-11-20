@@ -1,6 +1,8 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.util;
 
 import android.content.Context;
+
+import com.dankideacentral.dic.R;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;

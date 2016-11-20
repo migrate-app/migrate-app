@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.activities;
 
 import android.content.res.Configuration;
 import android.os.Bundle;

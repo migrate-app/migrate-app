@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.view;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
