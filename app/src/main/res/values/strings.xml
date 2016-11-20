@@ -79,6 +79,7 @@
     <string name= "directions">Directions</string>
     <string name= "back_to_map">back to map</string>
     <string name= "share">Share</string>
+    <string name = "share_message">"REACH! I Found a cool event on Migrate!"</string>
 
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">Data &amp; sync</string>

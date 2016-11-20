@@ -71,6 +71,13 @@ public class TweetListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             tweetNodes = getArguments().getParcelableArrayList("TWEETS");
+
+            if (tweetNodes.get(0) instanceof TweetNode) {
+                TweetNode firstNode = (TweetNode) tweetNodes.get(0);
+                location = firstNode.getPosition();
+            }
+
+
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
     }
@@ -110,6 +117,12 @@ public class TweetListFragment extends Fragment {
 
                     case R.id.share:
                         // implement the share info
+                        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                        sharingIntent.setType("text/plain");
+                        String shareBody = "" + getDirectionsUri().toString();
+                        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.share_message));
+                        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+                        startActivity(Intent.createChooser(sharingIntent, "Share via"));
                     default:
                         return false;
 
