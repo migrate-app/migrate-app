@@ -499,7 +499,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
                     navHeader.setBackground(new BitmapDrawable(getResources(), mBitMap));
                 }
-            }.execute(user.getProfileBackgroundImageURL());
+            }.execute(user.getProfileBannerURL());
             String twitterHandle = "@" + user.getScreenName();
 
             // This is executed in UI thread, so set nav drawer header values to user data
