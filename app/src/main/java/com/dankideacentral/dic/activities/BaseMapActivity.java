@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.activities;
 
 import android.content.Context;
 import android.location.LocationManager;
@@ -7,19 +7,11 @@ import android.util.Log;
 
 import com.dankideacentral.dic.algo.WeightedNodeAlgorithm;
 import com.dankideacentral.dic.model.TweetNode;
-import com.dankideacentral.dic.model.WeightedNode;
 import com.dankideacentral.dic.view.WeightedNodeRenderer;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.clustering.algo.Algorithm;
-import com.google.maps.android.clustering.view.ClusterRenderer;
-import com.google.maps.android.clustering.view.DefaultClusterRenderer;
-
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * Created by srowhani on 10/6/16.

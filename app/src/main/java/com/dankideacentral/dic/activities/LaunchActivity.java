@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -6,7 +6,9 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import com.dankideacentral.dic.authentication.LoginActivity;
+
+import com.dankideacentral.dic.R;
+import com.dankideacentral.dic.util.TwitterUtil;
 import com.dankideacentral.dic.authentication.TwitterSession;
 
 import twitter4j.auth.AccessToken;

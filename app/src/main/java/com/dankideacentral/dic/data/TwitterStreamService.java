@@ -1,4 +1,4 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.data;
 
 import android.app.Service;
 import android.content.Intent;
@@ -8,6 +8,10 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.dankideacentral.dic.R;
+import com.dankideacentral.dic.activities.TweetFeedActivity;
+import com.dankideacentral.dic.util.GeolocationFilter;
 
 import twitter4j.FilterQuery;
 import twitter4j.GeoLocation;

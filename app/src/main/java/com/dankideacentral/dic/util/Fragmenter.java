@@ -4,8 +4,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
-import com.dankideacentral.dic.R;
-
 public class Fragmenter {
     FragmentManager fm;
 

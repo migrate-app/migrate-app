@@ -1,14 +1,14 @@
-package com.dankideacentral.dic;
+package com.dankideacentral.dic.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.dankideacentral.dic.TweetListFragment.OnListFragmentInteractionListener;
+import com.dankideacentral.dic.R;
+import com.dankideacentral.dic.fragments.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.model.TweetNode;
 
 import java.util.List;

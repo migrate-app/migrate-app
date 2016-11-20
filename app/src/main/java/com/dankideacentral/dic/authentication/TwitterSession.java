@@ -10,7 +10,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.dankideacentral.dic.R;
-import com.dankideacentral.dic.TwitterUtil;
+import com.dankideacentral.dic.util.TwitterUtil;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -103,6 +103,34 @@ public class TwitterSession {
     }
 
     /**
+     * Sets the singleton's {@link RequestToken}.
+     *
+     * @param newRequestToken
+     *          The new {@link RequestToken} to give the
+     *          {@link TwitterSession}.
+     */
+    public void setRequestToken(final RequestToken newRequestToken) {
+        requestToken = newRequestToken;
+    }
+
+    /**
+     * Creates an {@link AccessToken} from Twitter's
+     * redirect {@link Uri}. The URI contains the
+     * oauth_verifier as a query parameter.
+     *
+     * @param uri
+     *          The {@link Uri} containing the oauth_verifier.
+     */
+    public void createSession(final Uri uri, final Context applicationContext,
+                              final Handler.Callback callback) {
+        assert callback != null;
+        String authVerifier = getOAuthVerifierFromUri(uri);
+
+        // Start asynchronous task to request user accessToken from twitter
+        new GetTwitterAccessTokenTask(applicationContext, callback).execute(authVerifier);
+    }
+
+    /**
      * Sets the singleton's {@link AccessToken}.
      *
      * @param newAccessToken
@@ -126,34 +154,6 @@ public class TwitterSession {
      */
     private String getOAuthVerifierFromUri(final Uri uri) {
         return uri.getQueryParameter(TOKEN_VERIFIER);
-    }
-
-    /**
-     * Creates an {@link AccessToken} from Twitter's
-     * redirect {@link Uri}. The URI contains the
-     * oauth_verifier as a query parameter.
-     *
-     * @param uri
-     *          The {@link Uri} containing the oauth_verifier.
-     */
-    void createSession(final Uri uri, final Context applicationContext,
-                       final Handler.Callback callback) {
-        assert callback != null;
-        String authVerifier = getOAuthVerifierFromUri(uri);
-
-        // Start asynchronous task to request user accessToken from twitter
-        new GetTwitterAccessTokenTask(applicationContext, callback).execute(authVerifier);
-    }
-
-    /**
-     * Sets the singleton's {@link RequestToken}.
-     *
-     * @param newRequestToken
-     *          The new {@link RequestToken} to give the
-     *          {@link TwitterSession}.
-     */
-    void setRequestToken(final RequestToken newRequestToken) {
-        requestToken = newRequestToken;
     }
 
     /**

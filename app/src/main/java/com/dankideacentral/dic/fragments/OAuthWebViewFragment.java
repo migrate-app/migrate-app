@@ -1,4 +1,4 @@
-package com.dankideacentral.dic.authentication;
+package com.dankideacentral.dic.fragments;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,9 +15,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.dankideacentral.dic.SearchActivity;
+import com.dankideacentral.dic.activities.SearchActivity;
 import com.dankideacentral.dic.R;
-import com.dankideacentral.dic.TweetFeedActivity;
+import com.dankideacentral.dic.activities.TweetFeedActivity;
+import com.dankideacentral.dic.authentication.TwitterSession;
 
 public class OAuthWebViewFragment extends Fragment {
 
