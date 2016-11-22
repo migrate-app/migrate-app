@@ -82,6 +82,7 @@
     <string name = "share_message">"REACH! I Found a cool event on Migrate!"</string>
 
     <!-- Example settings for Data & Sync -->
+    <!-- TODO: Delete unused strings. -->
     <string name="pref_header_data_sync">Data &amp; sync</string>
 
     <string name="pref_title_sync_frequency">Sync frequency</string>

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
@@ -19,6 +20,7 @@ import android.support.v4.app.FragmentTransaction;
 
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -63,16 +65,18 @@ public class TweetFeedActivity extends BaseMapActivity
     private static final String CURRENT_FRAGMENT = "CURRENT_FRAGMENT";
     private static final String LOG_TAG = "TweetFeedActivity";
 
-    private LatLng currentLocation;
-    private ClusterManager<TweetNode> clusterManager;
+    private static LatLng currentLocation;
+    private static ClusterManager<TweetNode> clusterManager;
 
     private Fragmenter fm;
     private LocationFinder locationFinder;
-    private Twitter twitter;
+    private static Twitter twitter;
 
-    private Set<Long> friends = new HashSet<>();
-    private Set<Long> followers = new HashSet<>();
+    private static Set<Long> friends = new HashSet<>();
+    private static Set<Long> followers = new HashSet<>();
     private static int notificationId = 0;
+
+    private static SharedPreferences preferences;
 
     @Override
     public void onStart () {
@@ -86,12 +90,13 @@ public class TweetFeedActivity extends BaseMapActivity
         Log.v(getClass().getName(), "onCreate");
 
         setContentView(R.layout.activity_tweet_feed);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
         fm = new Fragmenter(getSupportFragmentManager());
         twitter = TwitterUtil.getInstance().getTwitter();
 
         // Asynchronously fetch the user's friends and followers
-        new FetchTwitterFriends().execute();
-        new FetchTwitterFollowers().execute();
+        new FetchTwitterFriendsTask().execute();
+        new FetchTwitterFollowersTask().execute();
 
         // Set the navigation icon of the tool bar & its onClick listener
         setToolbar();
@@ -137,6 +142,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
     @Override
     public void mapReady(GoogleMap map, LocationManager lm, final ClusterManager cm) {
+
         // set up broadcast receiver
         Log.v(getClass().getName(), "mapReady called");
         initCurrentLocation();
@@ -160,18 +166,22 @@ public class TweetFeedActivity extends BaseMapActivity
                 });
                 Log.v("Received Tweet: ", tweet.toString());
 
-                // Send notification if tweeted by a friend or follower
-                String tweetUserName = tweet.getUser().getName();
-                long tweetUserId = tweet.getUser().getId();
-                if(friends.contains(tweetUserId)) {
-                    notificationHandler.sendNotification("Your friend " + tweetUserName + " tweeted near you!",
-                            notificationId++);
-                } else if(followers.contains(tweetUserId)) {
-                    notificationHandler.sendNotification("Your follower " + tweetUserName + " tweeted near you!",
-                            notificationId++);
-                } else if(tweet.getUser().isVerified()) {
-                    notificationHandler.sendNotification("Celebrity Tweeter " + tweetUserName + " tweeted near you!",
-                            notificationId++);
+                // Send notification if tweeted by a friend or follower or verified user
+                boolean notificationsOn = preferences.getBoolean("pref_key_push_notifications", false);
+                if(notificationsOn) {
+                    String tweetUserName = tweet.getUser().getName();
+                    long tweetUserId = tweet.getUser().getId();
+
+                    if (friends.contains(tweetUserId)) {
+                        notificationHandler.sendNotification("Your friend " + tweetUserName + " tweeted near you!",
+                                notificationId++);
+                    } else if (followers.contains(tweetUserId)) {
+                        notificationHandler.sendNotification("Your follower " + tweetUserName + " tweeted near you!",
+                                notificationId++);
+                    } else if (tweet.getUser().isVerified()) {
+                        notificationHandler.sendNotification("Celebrity " + tweetUserName + " tweeted near you!",
+                                notificationId++);
+                    }
                 }
             }
         }, new IntentFilter(getString(R.string.tweet_broadcast)));
@@ -185,7 +195,6 @@ public class TweetFeedActivity extends BaseMapActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.getMenu().clear();
         toolbar.setNavigationIcon(R.drawable.ic_nav_button);
-
         setNavigationButtonListener(toolbar, drawerLayout, navDrawer);
     }
 
@@ -318,7 +327,7 @@ public class TweetFeedActivity extends BaseMapActivity
         setNavigationMenuItemClickListeners(navDrawer, drawerLayout);
 
         // Spawn async task to query twitter for user info and populate nav drawer header
-        new GetTwitterUserInfoTask().execute(navHeader);
+        new FetchTwitterUserInfoTask().execute(navHeader);
 
         return navDrawer;
     }
@@ -340,6 +349,7 @@ public class TweetFeedActivity extends BaseMapActivity
         Menu navMenu = navDrawer.getMenu();
 
         // Settings menu onClick listener
+        // TODO: Going into Settings seems to kill the TweetStreamService.
         navMenu.findItem(R.id.nav_settings).setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
                     @Override
@@ -414,7 +424,7 @@ public class TweetFeedActivity extends BaseMapActivity
      * Asynchronous task to query twitter for the {@link User}'s
      * information to populate the nav drawer with.
      */
-    private class GetTwitterUserInfoTask extends AsyncTask<View, Long, User> {
+    private class FetchTwitterUserInfoTask extends AsyncTask<View, Long, User> {
         private ViewGroup navHeader;
         private TextView twitterNameText;
         private TextView twitterHandleText;
@@ -470,7 +480,8 @@ public class TweetFeedActivity extends BaseMapActivity
         }
     }
 
-    private class FetchTwitterFriends extends AsyncTask<Void, Void, Set<Long>> {
+    // TODO: Add comments to document this class.
+    private class FetchTwitterFriendsTask extends AsyncTask<Void, Void, Set<Long>> {
 
         @Override
         protected Set<Long> doInBackground(Void... params) {
@@ -488,7 +499,7 @@ public class TweetFeedActivity extends BaseMapActivity
                 }
             } catch (TwitterException e) {
                 Log.i("TweetStreamService", "Error occurred when attempting to find user's friends." +
-                        "It's probably because you're trying to fetch too many friends.");
+                        "It might be because you're trying to fetch too many friends.");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -501,7 +512,8 @@ public class TweetFeedActivity extends BaseMapActivity
         }
     }
 
-    private class FetchTwitterFollowers extends AsyncTask<Void, Void, Set<Long>> {
+    // TODO: Add comments to document this class.
+    private class FetchTwitterFollowersTask extends AsyncTask<Void, Void, Set<Long>> {
 
         @Override
         protected Set<Long> doInBackground(Void... params) {
@@ -519,7 +531,7 @@ public class TweetFeedActivity extends BaseMapActivity
                 }
             } catch (TwitterException e) {
                 Log.i("TweetStreamService", "Error occurred when attempting to find user's followers. " +
-                        "It's probably because you're trying to fetch too many followers.");
+                        "It might be because you're trying to fetch too many followers.");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -530,7 +542,5 @@ public class TweetFeedActivity extends BaseMapActivity
         protected void onPostExecute(Set<Long> followersSet) {
             followers.addAll(followersSet);
         }
-
     }
-
 }

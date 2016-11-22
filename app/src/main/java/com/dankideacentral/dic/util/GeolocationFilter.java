@@ -77,7 +77,6 @@ public class GeolocationFilter {
     }
 
     // implementation of the Haversine formula
-
     private double getDistanceFromSearchLocationToTweet(GeoLocation tweetLocation){
         double dLat = Math.toRadians(tweetLocation.getLatitude() - searchLocation.getLatitude());
         double dLong = Math.toRadians(tweetLocation.getLongitude() - searchLocation.getLongitude());
