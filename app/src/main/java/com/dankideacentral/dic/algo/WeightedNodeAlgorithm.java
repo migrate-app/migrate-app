@@ -3,7 +3,6 @@ package com.dankideacentral.dic.algo;
 import com.dankideacentral.dic.model.WeightedNode;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.Cluster;
-import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.algo.Algorithm;
 import com.google.maps.android.clustering.algo.StaticCluster;
 import com.google.maps.android.geometry.Bounds;
@@ -26,61 +25,6 @@ import java.util.Set;
 public class WeightedNodeAlgorithm <T extends WeightedNode> implements Algorithm <T> {
 
     public static final int MAX_DISTANCE_AT_ZOOM = 80; // essentially 100 dp.
-
-    private final Collection<WeightedItem<T>> mItems = new ArrayList<WeightedItem<T>>();
-
-    private final PointQuadTree<WeightedItem<T>> mWeightedTree = new PointQuadTree<WeightedItem<T>>(0, 1, 0, 1);
-
-    private static final SphericalMercatorProjection PROJECTION = new SphericalMercatorProjection(1);
-
-    private static class WeightedItem <T extends WeightedNode> implements PointQuadTree.Item, Cluster<T> {
-        private final T mClusterItem;
-        private final Point mPoint;
-        private final LatLng mPosition;
-        private Set<T> singletonSet;
-
-        private WeightedItem (T item) {
-            mClusterItem = item;
-            mPosition = item.getPosition();
-            mPoint = PROJECTION.toPoint(mPosition);
-            singletonSet = Collections.singleton(mClusterItem);
-        }
-
-        @Override
-        public Point getPoint() {
-            return mPoint;
-        }
-
-        @Override
-        public LatLng getPosition() {
-            return mPosition;
-        }
-
-        @Override
-        public Set<T> getItems() {
-            return singletonSet;
-        }
-
-        @Override
-        public int getSize() {
-            return mClusterItem.getSize();
-        }
-
-        @Override
-        public int hashCode() {
-            return mClusterItem.hashCode();
-        };
-
-        @Override
-        public boolean equals(Object other) {
-            if (!(other instanceof WeightedItem<?>)) {
-                return false;
-            }
-
-            return ((WeightedItem<?>) other).mClusterItem.equals(mClusterItem);
-        }
-    }
-
 
     @Override
     public void addItem(T item) {
@@ -165,6 +109,17 @@ public class WeightedNodeAlgorithm <T extends WeightedNode> implements Algorithm
         return results;
     }
 
+    @Override
+    public Collection<T> getItems() {
+        return null;
+    }
+
+    private final Collection<WeightedItem<T>> mItems = new ArrayList<WeightedItem<T>>();
+
+    private final PointQuadTree<WeightedItem<T>> mWeightedTree = new PointQuadTree<WeightedItem<T>>(0, 1, 0, 1);
+
+    private static final SphericalMercatorProjection PROJECTION = new SphericalMercatorProjection(1);
+
     private Bounds createBoundsFromSpan(Point p, double span) {
         // TODO: Use a span that takes into account the visual size of the marker, not just its
         // LatLng.
@@ -176,8 +131,52 @@ public class WeightedNodeAlgorithm <T extends WeightedNode> implements Algorithm
     private double distanceSquared(Point a, Point b) {
         return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
     }
-    @Override
-    public Collection<T> getItems() {
-        return null;
+
+    private static class WeightedItem <T extends WeightedNode> implements PointQuadTree.Item, Cluster<T> {
+        private final T mClusterItem;
+        private final Point mPoint;
+        private final LatLng mPosition;
+        private Set<T> singletonSet;
+
+        private WeightedItem (T item) {
+            mClusterItem = item;
+            mPosition = item.getPosition();
+            mPoint = PROJECTION.toPoint(mPosition);
+            singletonSet = Collections.singleton(mClusterItem);
+        }
+
+        @Override
+        public Point getPoint() {
+            return mPoint;
+        }
+
+        @Override
+        public LatLng getPosition() {
+            return mPosition;
+        }
+
+        @Override
+        public Set<T> getItems() {
+            return singletonSet;
+        }
+
+        @Override
+        public int getSize() {
+            return mClusterItem.getSize();
+        }
+
+        @Override
+        public int hashCode() {
+            return mClusterItem.hashCode();
+        };
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof WeightedItem<?>)) {
+                return false;
+            }
+
+            return ((WeightedItem<?>) other).mClusterItem.equals(mClusterItem);
+        }
     }
 }

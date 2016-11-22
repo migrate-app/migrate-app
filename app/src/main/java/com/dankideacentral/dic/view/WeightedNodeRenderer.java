@@ -55,20 +55,24 @@ import static com.google.maps.android.clustering.algo.NonHierarchicalDistanceBas
 /**
  * The default view for a ClusterManager. Markers are animated in and out of clusters.
  */
-public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRenderer<T> {
+public abstract class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRenderer<T> {
     private static final String TAG = "WeightedNodeRenderer";
     private static final boolean SHOULD_ANIMATE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     private final GoogleMap mMap;
     private final ClusterManager<T> mClusterManager;
     private final float mDensity;
 
+    /**
+     * Sends a notification to the user.
+     * Abstract as algorithm is not concerned with how this is done.
+     */
+    public abstract void sendUserNotification();
 
     /**
      * Markers that are currently on the map.
      */
     private Set<MarkerWithPosition> mMarkers = Collections.newSetFromMap(
             new ConcurrentHashMap<MarkerWithPosition, Boolean>());
-
 
     /**
      * Markers for single ClusterItems.
@@ -812,6 +816,7 @@ public class WeightedNodeRenderer<T extends ClusterItem> implements ClusterRende
                     onClusterRendered(cluster, marker);
 
                     newMarkers.add(markerWithPosition);
+                    sendUserNotification();
                 }
             }.execute(markerOptions);
         }
