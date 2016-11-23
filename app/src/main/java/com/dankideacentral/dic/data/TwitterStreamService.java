@@ -35,9 +35,15 @@ public class TwitterStreamService extends Service {
 
         Log.v(className, "Starting Twitter Stream");
 
+        // Get search radius from user's preferences
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int radius = preferences.getInt(getString(R.string.preference_radius), 250); // radius in km
+        int radius = preferences.getInt("pref_key_search_radius", 250); // radius in kilometers
         Log.d("RADIUS_PREF", radius + "");
+
+        // Get user's location
+        double lat = intent.getDoubleExtra(getString(R.string.intent_lat), 0.0);
+        double lon = intent.getDoubleExtra(getString(R.string.intent_long), 0.0);
+
         //  TODO: what happens when the auth or auth_secret is empty... we need to stop and return to login
         String authToken = preferences.getString(getString(R.string.twitter_auth_preference), null);
         String authTokenSecret = preferences.getString(
@@ -45,12 +51,10 @@ public class TwitterStreamService extends Service {
         AccessToken accessToken = new AccessToken(getString(R.string.twitter_access_key),
                 getString(R.string.twitter_access_secret));
 
-        double lat = intent.getDoubleExtra(getString(R.string.intent_lat), 0.0);
-        double lon = intent.getDoubleExtra(getString(R.string.intent_long), 0.0);
-
+        // Set up the Twitter stream
         FilterQuery mFilter = new FilterQuery();
         mFilter.locations(GeolocationFilter.createBounds(lat, lon, radius));
-        // set up the twitter stream
+        mFilter.locations(GeolocationFilter.createBounds(lat, lon, radius));
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
                 .setOAuthConsumerKey(getString(R.string.twitter_consumer_key))
                 .setOAuthConsumerSecret(getString(R.string.twitter_consumer_secret))
@@ -58,9 +62,10 @@ public class TwitterStreamService extends Service {
                 .setOAuthAccessTokenSecret(authTokenSecret);
         twitterStream = new TwitterStreamFactory(configurationBuilder.build()).getInstance(accessToken);
         twitterStream.addListener(twitterStreamListener);
-        // Begin filter stream
-         twitterStream.filter(mFilter);
-        //twitterStream.sample();
+
+        // Start the filter stream
+        twitterStream.filter(mFilter);
+
         return START_NOT_STICKY;
     }
 
@@ -77,7 +82,7 @@ public class TwitterStreamService extends Service {
         return null;
     }
 
-    // listens to the twitter stream
+    // Listen to the stream and send relevant tweets to the TweetFeedActivity
     StatusListener twitterStreamListener = new StatusListener() {
         private final String TAG = "TwitterStreamListener";
 
@@ -100,23 +105,15 @@ public class TwitterStreamService extends Service {
         }
 
         @Override
-        public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
-
-        }
+        public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {}
 
         @Override
-        public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
-
-        }
+        public void onTrackLimitationNotice(int numberOfLimitedStatuses) {}
 
         @Override
-        public void onScrubGeo(long userId, long upToStatusId) {
-
-        }
+        public void onScrubGeo(long userId, long upToStatusId) {}
 
         @Override
-        public void onStallWarning(StallWarning warning) {
-
-        }
+        public void onStallWarning(StallWarning warning) {}
     };
 }
