@@ -1,0 +1,3 @@
+- Weekly scrum (2h)
+- Nav view header render (1h)
+- bug fixes (1h)
