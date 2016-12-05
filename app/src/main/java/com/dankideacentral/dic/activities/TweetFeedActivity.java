@@ -34,6 +34,7 @@ import com.dankideacentral.dic.R;
 import com.dankideacentral.dic.fragments.TweetListFragment;
 import com.dankideacentral.dic.fragments.TweetListFragment.OnListFragmentInteractionListener;
 import com.dankideacentral.dic.data.TwitterStreamService;
+import com.dankideacentral.dic.util.NotificationHandler;
 import com.dankideacentral.dic.util.TwitterUtil;
 import com.dankideacentral.dic.authentication.TwitterSession;
 import com.dankideacentral.dic.model.TweetNode;
@@ -75,6 +76,7 @@ public class TweetFeedActivity extends BaseMapActivity
 
     private static Set<Long> friends = new HashSet<>();
     private static Set<Long> followers = new HashSet<>();
+
     private static int notificationId = 0;
 
     private static SharedPreferences preferences;
@@ -175,13 +177,13 @@ public class TweetFeedActivity extends BaseMapActivity
 
                     if (friends.contains(tweetUserId)) {
                         notificationHandler.sendNotification("Your friend " + tweetUserName + " tweeted near you!",
-                                notificationId++);
+                                NotificationHandler.NOTIF_FOLLOWING);
                     } else if (followers.contains(tweetUserId)) {
                         notificationHandler.sendNotification("Your follower " + tweetUserName + " tweeted near you!",
-                                notificationId++);
+                                NotificationHandler.NOTIF_FOLLOWER);
                     } else if (tweet.getUser().isVerified()) {
                         notificationHandler.sendNotification("Celebrity " + tweetUserName + " tweeted near you!",
-                                notificationId++);
+                                NotificationHandler.NOTIF_CELEBRITY);
                     }
                 }
             }

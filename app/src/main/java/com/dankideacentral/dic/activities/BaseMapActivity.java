@@ -20,9 +20,7 @@ import com.google.maps.android.clustering.ClusterManager;
  */
 public abstract class BaseMapActivity extends AppCompatActivity implements
         OnMapReadyCallback, ClusterManager.OnClusterClickListener, ClusterManager.OnClusterItemClickListener {
-
-    private static final int EVENT_NOTIFICATION_ID = -1;
-
+    
     protected NotificationHandler notificationHandler;
 
     private GoogleMap mMap;
@@ -66,7 +64,7 @@ public abstract class BaseMapActivity extends AppCompatActivity implements
             @Override
             public void sendUserNotification() {
                 notificationHandler.sendNotification("An event is occurring near you!",
-                        EVENT_NOTIFICATION_ID);
+                        NotificationHandler.NOTIF_CLUSTER);
             }
         };
 
