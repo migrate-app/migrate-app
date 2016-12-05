@@ -794,7 +794,6 @@ public abstract class WeightedNodeRenderer<T extends ClusterItem> implements Clu
                     // mIcon = cfilter(mIcon, mScale % 255, 255, 255);
 
                     BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(mIcon);
-
                     markerOptions.anchor(.5f, .5f);
                     markerOptions.icon(descriptor);
                     markerOptions.title(mNode.getStatus().getUser().getName());

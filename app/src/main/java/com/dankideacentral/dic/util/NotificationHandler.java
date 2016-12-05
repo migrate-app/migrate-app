@@ -23,6 +23,10 @@ import com.dankideacentral.dic.R;
  * @since 2016-11-20
  */
 public class NotificationHandler {
+    public final static int NOTIF_CLUSTER = 0;
+    public final static int NOTIF_CELEBRITY = 1;
+    public final static int NOTIF_FOLLOWER = 2;
+    public final static int NOTIF_FOLLOWING = 3;
 
     private NotificationCompat.Builder notificationBuilder;
     private TaskStackBuilder taskStackBuilder;
