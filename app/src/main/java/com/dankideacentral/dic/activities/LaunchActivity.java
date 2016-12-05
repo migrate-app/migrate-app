@@ -10,6 +10,7 @@ import android.os.Bundle;
 import com.dankideacentral.dic.R;
 import com.dankideacentral.dic.util.TwitterUtil;
 import com.dankideacentral.dic.authentication.TwitterSession;
+import com.facebook.drawee.backends.pipeline.Fresco;
 
 import twitter4j.auth.AccessToken;
 
@@ -21,6 +22,7 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Fresco.initialize(this);
 
         // Set preferences to default values when the app is opened for the first time
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);

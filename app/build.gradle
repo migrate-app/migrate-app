@@ -49,5 +49,6 @@ dependencies {
     compile 'com.google.maps.android:android-maps-utils:0.4'
     compile 'com.android.support:support-v4:24.2.0'
     compile 'com.pavelsikun:material-seekbar-preference:2.3.0+'
+    compile 'com.facebook.fresco:fresco:0.14.1'
     testCompile 'junit:junit:4.12'
 }

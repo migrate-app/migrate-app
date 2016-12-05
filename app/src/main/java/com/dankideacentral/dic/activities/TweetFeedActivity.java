@@ -40,6 +40,7 @@ import com.dankideacentral.dic.model.TweetNode;
 import com.dankideacentral.dic.util.Fragmenter;
 import com.dankideacentral.dic.util.ImageProcessor;
 import com.dankideacentral.dic.util.LocationFinder;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -428,6 +429,7 @@ public class TweetFeedActivity extends BaseMapActivity
         private ViewGroup navHeader;
         private TextView twitterNameText;
         private TextView twitterHandleText;
+        private SimpleDraweeView twitterProfilePicture;
 
         @Override
         protected User doInBackground(View... params) {
@@ -450,9 +452,11 @@ public class TweetFeedActivity extends BaseMapActivity
         }
 
         @Override
-        protected void onPostExecute(User user) {
+        protected void onPostExecute(final User user) {
             twitterNameText = (TextView) navHeader.findViewById(R.id.twitter_name);
             twitterHandleText = (TextView) navHeader.findViewById(R.id.twitter_handle);
+            twitterProfilePicture = (SimpleDraweeView) navHeader.findViewById(R.id.twitter_picture);
+
             // If no user was found then Toast user and return
             if (user == null) {
                 Toast.makeText(TweetFeedActivity.this.getBaseContext(), "Unable to contact Twitter.",
@@ -470,6 +474,7 @@ public class TweetFeedActivity extends BaseMapActivity
                     super.onPostExecute(mBitMap);
 
                     navHeader.setBackground(new BitmapDrawable(getResources(), mBitMap));
+                    twitterProfilePicture.setImageURI(user.getBiggerProfileImageURL());
                 }
             }.execute(user.getProfileBannerURL());
             String twitterHandle = "@" + user.getScreenName();
